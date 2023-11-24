@@ -1,0 +1,18 @@
+version: '2.1'
+services:
+  ixy:
+    container_name: ixy
+    build:
+      context: .
+      target: development
+    environment:
+      - FORCE_COLOR=1
+      - BASE_URL=https://placekitten.com
+      - REVALIDATE_AFTER=1
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - ./src:/home/node/app/src:ro
+      - cache:/home/node/cache
+volumes:
+  cache:
