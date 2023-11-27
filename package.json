@@ -11,6 +11,7 @@
   "author": "Arne Diekmann <diekmann@neoskop.de>",
   "license": "MIT",
   "dependencies": {
+    "@fastify/etag": "5.0.0",
     "async": "3.2.5",
     "axios": "1.6.2",
     "chalk": "5.3.0",
