@@ -23,3 +23,4 @@ $ curl -o /dev/null \
 - `TIMEOUT`: The timeout in seconds when fetching source images (Default: `15`)
 - `MAX_REDIRECTS`: The maximum number of redirects when fetching source images (Default: `5`)
 - `CACHE_DIR`: The directory to store the source and target images in (Default: `/home/node/cache`)
+- `CACHE_CONTROL_MAX_AGE`: The maximum age of the cache in days (Default: `365`)

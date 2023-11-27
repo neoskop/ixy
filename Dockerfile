@@ -10,7 +10,8 @@ ENV MAX_WIDTH=2000 \
     DEBUG=false \
     TIMEOUT=15 \
     MAX_REDIRECTS=5 \
-    CACHE_DIR=/home/node/cache
+    CACHE_DIR=/home/node/cache \
+    CACHE_CONTROL_MAX_AGE=365
 EXPOSE 8080
 VOLUME [ "/home/node/cache" ]
 
