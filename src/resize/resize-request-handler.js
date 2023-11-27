@@ -58,7 +58,7 @@ export async function resizeRequestHandler(request, reply) {
     }
 
     reply.header("Content-Type", "image/webp");
-    reply.header("Cache-Control", `public, max-age=${60 * 60 * 24 * 7 * 1000}`);
+    reply.header("Cache-Control", `public, max-age=${60 * 60 * 24 * 365}`);
     return reply.send(resizedImage);
   } catch (err) {
     if (err.name === "AbortError") {
