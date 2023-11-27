@@ -4,6 +4,7 @@ import axios from "axios";
 import { logger } from "../util/logger.js";
 import { canonicalizeFileName } from "./canonicalize-filename.js";
 import { updateTargetImages } from "./update-target-images.js";
+import { storeFileInCache } from "./store-file-in-cache.js";
 
 async function updateCachedImages(response, path) {
   await storeFileInCache(
@@ -12,7 +13,7 @@ async function updateCachedImages(response, path) {
     response.data,
     response.headers["last-modified"]
   );
-  await updateTargetImages(path, sourceImageArrayBuffer);
+  await updateTargetImages(path, response.data);
 }
 
 export async function updateInBackground(path) {
@@ -62,7 +63,7 @@ export async function updateInBackground(path) {
       logger.debug(`The image hasn't changed! Nothing to do.`);
     } else {
       logger.debug(`The image has changed ... updating!`);
-      await updateCachedImages(path);
+      await updateCachedImages(response, path);
       newMtime = new Date(response.headers["last-modified"]);
     }
   } catch (error) {
