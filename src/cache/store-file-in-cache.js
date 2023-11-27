@@ -18,7 +18,7 @@ export async function storeFileInCache(
     await fs.writeFile(fullPath, Buffer.from(arrayBuffer));
     if (lastModified) {
       const lastModifiedDate = new Date(lastModified);
-      logger.info(
+      logger.debug(
         `Setting modfied date of ${chalk.bold(
           lastModifiedDate.toLocaleString()
         )}`
