@@ -1,7 +1,7 @@
 import sharp from "sharp";
-import { measured } from "./util/measured.js";
-import { storeFileInCache } from "./cache/store-file-in-cache.js";
-import { canonicalizeFileName } from "./cache/canonicalize-filename.js";
+import { measured } from "../util/measured.js";
+import { storeFileInCache } from "../cache/store-file-in-cache.js";
+import { canonicalizeFileName } from "../cache/canonicalize-filename.js";
 
 export async function resizeImage(path, image, targetWidth, targetHeight) {
   const arrayBuffer = await measured(

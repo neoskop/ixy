@@ -1,5 +1,5 @@
 import { canonicalizeFileName } from "./canonicalize-filename.js";
-import { resizeImage } from "../resize-image.js";
+import { resizeImage } from "../resize/resize-image.js";
 import glob from "fast-glob";
 import { logger } from "../util/logger.js";
 import { eachLimit } from "async";

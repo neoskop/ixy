@@ -8,6 +8,8 @@ ENV MAX_WIDTH=2000 \
     MAX_SIZE=5 \
     REVALIDATE_AFTER=30 \
     DEBUG=false \
+    TIMEOUT=15 \
+    MAX_REDIRECTS=5 \
     CACHE_DIR=/home/node/cache
 EXPOSE 8080
 VOLUME [ "/home/node/cache" ]

@@ -1,5 +1,5 @@
-import { loadFileFromCache } from "./cache/load-file-from-cache.js";
-import { canonicalizeFileName } from "./cache/canonicalize-filename.js";
+import { loadFileFromCache } from "../cache/load-file-from-cache.js";
+import { canonicalizeFileName } from "../cache/canonicalize-filename.js";
 
 export const fetchExistingTargetImage = async (
   path,

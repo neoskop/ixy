@@ -14,9 +14,12 @@ $ curl -o /dev/null \
 
 ## Environment variables
 
+- `DEBUG`: Enable debug logging
 - `BASE_URL`: The base URL of the upstream server
 - `MAX_WIDTH`: The maximum width of the target image (Default: `2000`)
 - `MAX_HEIGHT`: The maximum height of the target image (Default: `2000`)
 - `MAX_SIZE`: The maximum size of the source image in megabytes (Default: `5`)
 - `REVALIDATE_TIME`: The time in minutes for checking the source image for changes after its last access (Default: `30`)
+- `TIMEOUT`: The timeout in seconds when fetching source images (Default: `15`)
+- `MAX_REDIRECTS`: The maximum number of redirects when fetching source images (Default: `5`)
 - `CACHE_DIR`: The directory to store the source and target images in (Default: `/home/node/cache`)

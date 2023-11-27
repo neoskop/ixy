@@ -1,6 +1,6 @@
-import { loadFileFromCache } from "./cache/load-file-from-cache.js";
-import { storeFileInCache } from "./cache/store-file-in-cache.js";
-import { downloadSourceImage } from "./source/download-source-image.js";
+import { loadFileFromCache } from "../cache/load-file-from-cache.js";
+import { storeFileInCache } from "../cache/store-file-in-cache.js";
+import { downloadSourceImage } from "../source/download-source-image.js";
 
 export const fetchSourceImage = async (path, loadFromCache = true) => {
   const url = `${process.env.BASE_URL}${path}`;

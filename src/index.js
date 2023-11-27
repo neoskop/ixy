@@ -1,9 +1,9 @@
 import fastify from "fastify";
-import { resizeRequestHandler } from "./resize-request-handler.js";
+import { resizeRequestHandler } from "./resize/resize-request-handler.js";
 import { logger } from "./util/logger.js";
 
 const app = fastify({
-  logger,
+  logger: process.env.DEBUG === "true" ? logger : false,
 });
 
 app.get("/*", resizeRequestHandler);

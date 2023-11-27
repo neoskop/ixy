@@ -46,8 +46,8 @@ export async function updateInBackground(path) {
   try {
     const lastModifiedHeader = stats.mtime.toUTCString();
     const response = await axios.get(url, {
-      timeout: 15000,
-      maxRedirects: 5,
+      timeout: process.env.TIMEOUT * 1000,
+      maxRedirects: process.env.MAX_REDIRECTS,
       maxContentLength: process.env.MAX_SIZE * 1024 * 1024,
       headers: {
         "If-Modified-Since": lastModifiedHeader,

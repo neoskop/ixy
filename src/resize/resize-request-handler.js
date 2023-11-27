@@ -1,9 +1,10 @@
-import { logger } from "./util/logger.js";
-import { BadRequestException } from "./bad-request-exception.js";
-import { fetchSourceImage } from "./fetch-source-image.js";
-import { fetchExistingTargetImage } from "./fetch-existing-target-image.js";
+import { logger } from "../util/logger.js";
+import { BadRequestException } from "../error/bad-request-exception.js";
+import { NotFoundException } from "../error/not-found-exception.js";
+import { fetchSourceImage } from "../fetch/fetch-source-image.js";
+import { fetchExistingTargetImage } from "../fetch/fetch-existing-target-image.js";
 import { resizeImage } from "./resize-image.js";
-import { updateInBackground } from "./cache/update-in-background.js";
+import { updateInBackground } from "../cache/update-in-background.js";
 
 const MAX_IMAGE_DIMENSION = 5000;
 
@@ -55,6 +56,7 @@ export async function resizeRequestHandler(request, response) {
     } else {
       updateInBackground(path);
     }
+
     response.header("Content-Type", "image/webp");
     return response.send(resizedImage);
   } catch (err) {
@@ -63,6 +65,8 @@ export async function resizeRequestHandler(request, response) {
       return response.code(504).send("Request timed out");
     } else if (err instanceof BadRequestException) {
       return response.code(400).send(err.message);
+    } else if (err instanceof NotFoundException) {
+      return response.code(404).send(err.message);
     } else {
       logger.error(err.message);
       response.status(500).send("Internal Server Error");
