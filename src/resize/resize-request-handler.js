@@ -41,7 +41,7 @@ export function getParams(request) {
   };
 }
 
-export async function resizeRequestHandler(request, response) {
+export async function resizeRequestHandler(request, reply) {
   try {
     const { parsedWidth, parsedHeight, path } = getParams(request);
     let resizedImage = await fetchExistingTargetImage(
@@ -57,19 +57,20 @@ export async function resizeRequestHandler(request, response) {
       updateInBackground(path);
     }
 
-    response.header("Content-Type", "image/webp");
-    return response.send(resizedImage);
+    reply.header("Content-Type", "image/webp");
+    reply.header("Cache-Control", `public, max-age=${60 * 60 * 24 * 7 * 1000}`);
+    return reply.send(resizedImage);
   } catch (err) {
     if (err.name === "AbortError") {
       logger.error(`Request for ${chalk.bold(path)} timed out`);
-      return response.code(504).send("Request timed out");
+      return reply.code(504).send("Request timed out");
     } else if (err instanceof BadRequestException) {
-      return response.code(400).send(err.message);
+      return reply.code(400).send(err.message);
     } else if (err instanceof NotFoundException) {
-      return response.code(404).send(err.message);
+      return reply.code(404).send(err.message);
     } else {
       logger.error(err.message);
-      response.status(500).send("Internal Server Error");
+      reply.status(500).send("Internal Server Error");
     }
   }
 }
