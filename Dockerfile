@@ -22,6 +22,6 @@ COPY . .
 CMD [ "npm", "run", "start:dev" ]
 
 FROM base AS production
-RUN npm ci --only=production
+RUN npm ci --omit=dev
 COPY . .
 CMD [ "npm", "start" ]
