@@ -4,3 +4,4 @@ node_modules
 .dockerignore
 .gitignore
 scripts/
+dist
