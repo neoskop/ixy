@@ -7,21 +7,23 @@ import axios, { AxiosResponse } from 'axios';
 import { canonicalizeFileName } from '../../util/canonicalize-filename.js';
 import { CacheService } from '../cache.service.js';
 import { TargetService } from '../../image/target/target.service.js';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class CacheUpdateService {
   constructor(
     private readonly cacheService: CacheService,
     private readonly targetService: TargetService,
+    private readonly configService: ConfigService,
   ) {}
 
   public async updateTargetImages(
     path: string,
     sourceImageArrayBuffer: Buffer,
   ) {
-    const targetPath = `${process.env.CACHE_DIR}/target/${canonicalizeFileName(
-      path,
-    )}/*.webp`;
+    const targetPath = `${this.configService.getOrThrow<string>(
+      'CACHE_DIR',
+    )}/target/${canonicalizeFileName(path)}/*.webp`;
     const imageFiles = await glob(targetPath);
 
     await eachLimit(imageFiles, 5, async (imageFile) => {
@@ -51,16 +53,19 @@ export class CacheUpdateService {
     await this.updateTargetImages(path, response.data);
   }
 
-  public async updateInBackground(path) {
-    const url = `${process.env.BASE_URL}${path}`;
-    const fullPath = `${process.env.CACHE_DIR}/src/${canonicalizeFileName(
-      path,
-    )}`;
+  public async updateInBackground(path: string) {
+    const url = `${this.configService.getOrThrow<string>('BASE_URL')}${path}`;
+    const fullPath = `${this.configService.getOrThrow<string>(
+      'CACHE_DIR',
+    )}/src/${canonicalizeFileName(path)}`;
 
     const stats = await fs.stat(fullPath);
     if (
       stats.ctime.getTime() >=
-      Date.now() - Number(process.env.REVALIDATE_AFTER) * 60 * 1000
+      Date.now() -
+        Number(this.configService.getOrThrow<string>('REVALIDATE_AFTER')) *
+          60 *
+          1000
     ) {
       Logger.debug(
         `Don't have to check ${chalk.bold(
@@ -68,7 +73,7 @@ export class CacheUpdateService {
         )} for changes (Creation date: ${chalk.bold(
           stats.ctime.toLocaleString('de-DE'),
         )} is not older than ${chalk.bold(
-          process.env.REVALIDATE_AFTER,
+          this.configService.getOrThrow<string>('REVALIDATE_AFTER'),
         )} minutes)`,
       );
       return;
@@ -88,9 +93,15 @@ export class CacheUpdateService {
     try {
       const lastModifiedHeader = stats.mtime.toUTCString();
       const response = await axios.get(url, {
-        timeout: Number(process.env.TIMEOUT) * 1000,
-        maxRedirects: Number(process.env.MAX_REDIRECTS),
-        maxContentLength: Number(process.env.MAX_SIZE) * 1024 * 1024,
+        timeout:
+          Number(this.configService.getOrThrow<string>('TIMEOUT')) * 1000,
+        maxRedirects: Number(
+          this.configService.getOrThrow<string>('MAX_REDIRECTS'),
+        ),
+        maxContentLength:
+          Number(this.configService.getOrThrow<string>('MAX_SIZE')) *
+          1024 *
+          1024,
         headers: {
           'If-Modified-Since': lastModifiedHeader,
         },

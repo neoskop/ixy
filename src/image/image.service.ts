@@ -3,6 +3,7 @@ import { CacheUpdateService } from '../cache/cache-update/cache-update.service.j
 import { TargetService } from './target/target.service.js';
 import { CacheService } from '../cache/cache.service.js';
 import { SourceService } from './source/source.service.js';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class ImageService {
@@ -11,10 +12,11 @@ export class ImageService {
     private readonly cacheService: CacheService,
     private readonly cacheUpdateService: CacheUpdateService,
     private readonly targetService: TargetService,
+    private readonly configService: ConfigService,
   ) {}
 
   private async fetchSourceImage(path: string, loadFromCache = true) {
-    const url = `${process.env.BASE_URL}${path}`;
+    const url = `${this.configService.getOrThrow<string>('BASE_URL')}${path}`;
     let arrayBuffer = loadFromCache
       ? await this.cacheService.loadFileFromCache('src', path)
       : null;

@@ -3,13 +3,16 @@ import chalk from 'chalk';
 import fs from 'fs/promises';
 import { measured } from '../util/measured.js';
 import { canonicalizeFileName } from '../util/canonicalize-filename.js';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class CacheService {
+  constructor(private readonly configService: ConfigService) {}
+
   public async loadFileFromCache(directory: string, fileName: string) {
-    const fullPath = `${
-      process.env.CACHE_DIR
-    }/${directory}/${canonicalizeFileName(fileName)}`;
+    const fullPath = `${this.configService.getOrThrow<string>(
+      'CACHE_DIR',
+    )}/${directory}/${canonicalizeFileName(fileName)}`;
     const fileExists = await fs
       .access(fullPath)
       .then(() => true)
@@ -30,7 +33,9 @@ export class CacheService {
     arrayBuffer: ArrayBuffer,
     lastModified: string | number,
   ) {
-    const fullDir = `${process.env.CACHE_DIR}/${directory}`;
+    const fullDir = `${this.configService.getOrThrow<string>(
+      'CACHE_DIR',
+    )}/${directory}`;
     const fullPath = `${fullDir}/${canonicalizeFileName(fileName)}`;
 
     await measured(async () => {

@@ -10,10 +10,14 @@ import {
 import chalk from 'chalk';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { ImageService } from './image.service.js';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('*')
 export class ImageController {
-  constructor(private readonly imageService: ImageService) {}
+  constructor(
+    private readonly imageService: ImageService,
+    private readonly configService: ConfigService,
+  ) {}
 
   MAX_IMAGE_DIMENSION = 5000;
   private getParams(request: FastifyRequest) {
@@ -67,7 +71,10 @@ export class ImageController {
       reply.header(
         'Cache-Control',
         `public, max-age=${
-          60 * 60 * 24 * Number(process.env.CACHE_CONTROL_MAX_AGE)
+          60 *
+          60 *
+          24 *
+          Number(this.configService.getOrThrow<string>('CACHE_CONTROL_MAX_AGE'))
         }`,
       );
       reply.send(resizedImage);
