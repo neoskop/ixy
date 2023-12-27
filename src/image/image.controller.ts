@@ -19,7 +19,6 @@ export class ImageController {
     private readonly configService: ConfigService,
   ) {}
 
-  MAX_IMAGE_DIMENSION = 5000;
   private getParams(request: FastifyRequest) {
     const urlRegex = /\/(?<width>\d{1,4})\/(?<height>\d{1,4})(?<path>\/(.+))/;
     const {
@@ -28,8 +27,11 @@ export class ImageController {
       groups: { width: null, height: null, path: null },
     };
 
-    const parsedWidth = parseInt(width) || undefined;
-    const parsedHeight = parseInt(height) || undefined;
+    const parsedWidth = parseInt(width);
+    const parsedHeight = parseInt(height);
+
+    const maxWidth = this.configService.getOrThrow('MAX_WIDTH');
+    const maxHeight = this.configService.getOrThrow('MAX_HEIGHT');
 
     if (isNaN(parsedWidth) || isNaN(parsedHeight) || !path) {
       throw new BadRequestException(
@@ -38,11 +40,11 @@ export class ImageController {
     }
 
     if (
-      (parsedWidth && parsedWidth > this.MAX_IMAGE_DIMENSION) ||
-      (parsedHeight && parsedHeight > this.MAX_IMAGE_DIMENSION)
+      (parsedWidth && parsedWidth > maxWidth) ||
+      (parsedHeight && parsedHeight > maxHeight)
     ) {
       throw new BadRequestException(
-        `Width and height must not exceed ${this.MAX_IMAGE_DIMENSION} pixels.`,
+        `Width and height must not exceed ${maxWidth}x${maxHeight} pixels.`,
       );
     }
 

@@ -16,17 +16,17 @@ export class ImageService {
   ) {}
 
   private async fetchSourceImage(path: string, loadFromCache = true) {
-    const url = `${this.configService.getOrThrow<string>('BASE_URL')}${path}`;
-    let arrayBuffer = loadFromCache
-      ? await this.cacheService.loadFileFromCache('src', path)
-      : null;
+    const baseUrl = this.configService.getOrThrow<string>('BASE_URL');
+    const url = `${baseUrl}${path}`;
 
-    if (arrayBuffer) {
-      return arrayBuffer;
-    } else {
-      let lastModified: string;
-      ({ lastModified, arrayBuffer } =
-        await this.sourceService.downloadSourceImage(url));
+    let arrayBuffer: ArrayBuffer | null = null;
+    if (loadFromCache) {
+      arrayBuffer = await this.cacheService.loadFileFromCache('src', path);
+    }
+
+    if (!arrayBuffer) {
+      const { lastModified, arrayBuffer } =
+        await this.sourceService.downloadSourceImage(url);
       await this.cacheService.storeFileInCache(
         'src',
         path,
