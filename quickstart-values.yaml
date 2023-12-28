@@ -1,0 +1,21 @@
+# Disable default pod anti affinity rule to schedule multiple replicas in a single node cluster
+affinity:
+  podAntiAffinity: {}
+
+# Use locally build Papergirl image
+image:
+  repository: localhost:5000/ixy
+  tag: latest
+  pullPolicy: Always
+
+# Increase memory limit to allow for live reloading / dev mode
+resources:
+  limits:
+    memory: 1Gi
+
+# Enable development mode
+develop: true
+
+config:
+  BASE_URL: https://placekitten.com
+  REVALIDATE_AFTER: 1

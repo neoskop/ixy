@@ -12,10 +12,10 @@ export class SourceService {
     private readonly configService: ConfigService,
   ) {}
 
-  public async downloadSourceImage(url: string) {
+  private async downloadSourceImage(url: string) {
     try {
       return await measured(async () => {
-        const response = await axios.get(url, {
+        const response = await axios.get<ArrayBuffer>(url, {
           timeout:
             Number(this.configService.getOrThrow<string>('TIMEOUT')) * 1000,
           maxContentLength:

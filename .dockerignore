@@ -3,5 +3,7 @@ docker-compose.yaml
 node_modules
 .dockerignore
 .gitignore
+.prettierignore
 scripts/
 dist
+helm/

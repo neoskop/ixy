@@ -1,0 +1,11 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ include "ixy.fullname" . }}
+  labels:
+    {{- include "ixy.labels" . | nindent 4 }}
+data:
+  .env: |
+    {{- range $key, $value := .Values.config }}
+    {{ $key }}={{ $value }}
+    {{- end }}

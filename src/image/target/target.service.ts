@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import sharp from 'sharp';
 import { CacheService } from '../../cache/cache.service.js';
 import { canonicalizeFileName } from '../../util/canonicalize-filename.js';
@@ -29,25 +29,29 @@ export class TargetService {
     targetWidth: number,
     targetHeight: number,
   ) {
-    const arrayBuffer = await measured(
-      () =>
-        sharp(image)
-          .resize({
-            width: targetWidth,
-            height: targetHeight,
-            fit: sharp.fit.cover,
-          })
-          .withMetadata()
-          .webp({ quality: 80 })
-          .toBuffer(),
-      `Resized image`,
-    );
-    await this.cacheService.storeFileInCache(
-      `target/${canonicalizeFileName(path)}`,
-      `${targetWidth}-${targetHeight}.webp`,
-      arrayBuffer,
-      Date.now(),
-    );
-    return arrayBuffer;
+    try {
+      const arrayBuffer = await measured(
+        () =>
+          sharp(image)
+            .resize({
+              width: targetWidth,
+              height: targetHeight,
+              fit: sharp.fit.cover,
+            })
+            .withMetadata()
+            .webp({ quality: 80 })
+            .toBuffer(),
+        `Resized image`,
+      );
+      await this.cacheService.storeFileInCache(
+        `target/${canonicalizeFileName(path)}`,
+        `${targetWidth}-${targetHeight}.webp`,
+        arrayBuffer,
+        Date.now(),
+      );
+      return arrayBuffer;
+    } catch (error) {
+      Logger.error(`Failed to resize image: ${path}`, error);
+    }
   }
 }
