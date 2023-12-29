@@ -9,9 +9,9 @@ declare -A colors=(
 )
 
 horizontal_line() {
-    echo -ne "\033[38;5;242m" # Set background color to dark gray
-    printf "%*s\n" $(tput cols) | tr ' ' '-'
-    echo -ne "\033[0m" # Reset to default color
+    output+=$(echo -ne "\033[38;5;242m") # Set background color to dark gray
+    output+=$(printf "%*s" $(tput cols) | tr ' ' '-')
+    output+=$(echo -ne "\033[0m\n") # Reset to default color
 }
 
 show_cache() {
@@ -28,44 +28,57 @@ show_cache() {
     # Ensure the MODIFIED TIME header doesn't wrap by adjusting the column if necessary
     mtime_width=$((mtime_width - 2)) # Subtract a few characters to prevent wrapping
 
-    # Print table header with right-aligned SIZE and MODIFIED TIME
-    printf "\033[1m%-*s %*s %*s\033[0m\n" $file_width "FILE" $size_width "SIZE" $mtime_width "MOD. TIME"
+    # Append table header with right-aligned SIZE and MODIFIED TIME to the output variable
+    output+=$(printf "\033[1m%-*s %*s %*s\033[0m\n" $file_width "FILE" $size_width "SIZE" $mtime_width "MOD. TIME\n")
 
     if [ -z "$files" ]; then
         local message_length=${#message}
         local padding=$(((terminal_width / 2) - (message_length / 2)))
 
-        # Print empty message in bold, red, and centered
-        printf "\033[1;31m%${padding}s${message}\033[0m\n"
+        # Append empty message in bold, red, and centered to the output variable
+        output+=$(printf "\033[1;31m%${padding}s${message}\033[0m\n")
+        output+="\n" # Add an explicit newline character
     else
         for file in $files; do
             local file_path="$file"
             local size=$(kubectl -n ixy exec $pod -- du -sh $file_path | awk '{print $1}')
             local mtime=$(kubectl -n ixy exec $pod -- stat -c "%y" $file_path | awk -F"." '{print $1}')
 
-            # Print each row with right-aligned SIZE and MODIFIED TIME
-            printf "%-*s %*s %*s\n" $file_width "${file#$cache_path/}" $size_width "$size" $mtime_width "$mtime"
+            # Append each row with right-aligned SIZE and MODIFIED TIME to the output variable
+            output+=$(printf "%-*s %*s %*s\n" $file_width "${file#$cache_path/}" $size_width "$size" $mtime_width "$mtime\n")
         done
     fi
 }
 
-for pod in $(kubectl -n ixy get po -oname | cut -d'/' -f2); do
-    # Extract the pod number from the pod name
-    pod_number="${pod##*-}"
+while true; do
+    output=""
 
-    # Get the color corresponding to the pod number
-    color="${colors[$pod_number]}"
+    for pod in $(kubectl -n ixy get po -oname | cut -d'/' -f2); do
+        horizontal_line
 
-    # Calculate padding for centering the pod name
-    padding=$(($(tput cols) / 2 - ${#pod} / 2))
+        # Extract the pod number from the pod name
+        pod_number="${pod##*-}"
 
-    # Print the pod name in color and centered
-    printf "\n%${padding}s" ""        # Add padding before the pod name
-    echo -e "${color}${pod^^}\033[0m" # Print the pod name with color
+        # Get the color corresponding to the pod number
+        color="${colors[$pod_number]}"
 
-    horizontal_line
+        # Calculate padding for centering the pod name
+        padding=$(($(tput cols) / 2 - ${#pod} / 2))
 
-    show_cache
+        # Build the output string
+        output+="\n%${padding}s"            # Add padding before the pod name
+        output+="${color}${pod^^}\033[0m\n" # Print the pod name with color
 
-    horizontal_line
+        horizontal_line
+
+        show_cache
+
+        horizontal_line
+    done
+
+    # Clear the screen
+    clear
+
+    # Print the output string
+    printf "$output"
 done
