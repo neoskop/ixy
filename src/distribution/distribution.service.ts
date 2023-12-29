@@ -1,17 +1,12 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import k8s from '@kubernetes/client-node';
 import chalk from 'chalk';
+import fs from 'fs';
 import { basename } from 'path';
+import { KubernetesService } from '../kubernetes/kubernetes.service.js';
 
 @Injectable()
-export class DistributionService {
-  private kubeConfig: k8s.KubeConfig;
-  private client: k8s.CoreV1Api;
-  private cp: k8s.Cp;
-  private exec: k8s.Exec;
-  private namespace: string;
-  private currentPodName: string;
+export class DistributionService implements OnApplicationBootstrap {
   private colors = [
     chalk.red,
     chalk.blue,
@@ -20,26 +15,30 @@ export class DistributionService {
     chalk.magenta,
   ];
 
-  constructor(private readonly configService: ConfigService) {
-    this.kubeConfig = new k8s.KubeConfig();
-    this.kubeConfig.loadFromCluster();
-    this.client = this.kubeConfig.makeApiClient(k8s.CoreV1Api);
-    this.cp = new k8s.Cp(this.kubeConfig);
-    this.exec = new k8s.Exec(this.kubeConfig);
-    this.namespace = this.configService.get<string>('MY_POD_NAMESPACE');
-    this.currentPodName = this.configService.get<string>('MY_POD_NAME');
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly kubernetesService: KubernetesService,
+  ) {}
+
+  public async onApplicationBootstrap() {
+    if (!this.isDistributionEnabled()) {
+      return;
+    }
+
+    const podNames = await this.kubernetesService.findReadySiblingNames();
+
+    if (podNames.length === 0) {
+      Logger.debug(
+        `No ready sibling pods found. Skipping initialization of cache`,
+      );
+      return;
+    }
+
+    await this.copyFileFromPod(podNames[0]);
   }
 
-  private async findTargetPods(): Promise<string[]> {
-    try {
-      const pods = await this.client.listNamespacedPod(this.namespace);
-
-      return pods.body.items
-        .map((pod) => pod.metadata.name)
-        .filter((podName) => podName !== this.currentPodName);
-    } catch (err) {
-      Logger.error(JSON.stringify(err.body));
-    }
+  private isDistributionEnabled() {
+    return this.configService.getOrThrow<string>('DISTRIBUTION') === 'true';
   }
 
   private getPodLogColor(pod: string) {
@@ -52,30 +51,42 @@ export class DistributionService {
   }
 
   public async distribute(path: string): Promise<void> {
-    if (this.configService.getOrThrow<string>('DISTRIBUTION') !== 'true') {
-      Logger.debug(`Skipping distribution of ${chalk.bold(path)}`);
+    if (!this.isDistributionEnabled()) {
       return;
     }
 
-    const targetPods = await this.findTargetPods();
+    const siblingPodNames =
+      await this.kubernetesService.findReadySiblingNames();
 
-    for (const pod of targetPods) {
-      await this.copyToPod(this.namespace, pod, path);
+    for (const podName of siblingPodNames) {
+      await this.copyToPod(podName, path);
       Logger.log(
-        `Distributed ${chalk.bold(path)} to ${this.getPodLogColor(pod)(pod)}`,
+        `Distributed ${chalk.bold(path)} to ${this.getPodLogColor(podName)(
+          podName,
+        )}`,
       );
     }
   }
 
-  private async copyToPod(
-    namespace: string,
-    pod: string,
-    path: string,
-  ): Promise<void> {
+  private async copyFileFromPod(podName: string) {
+    const files = (
+      await this.kubernetesService.exec(podName, [
+        'find',
+        this.configService.get<string>('CACHE_DIR'),
+        '-type',
+        'f',
+      ])
+    ).filter(Boolean);
+    for (const file of files) {
+      Logger.debug(`Copying ${chalk.bold(file)} from ${chalk.bold(podName)}`);
+      await this.copyFromPod(podName, file);
+    }
+  }
+
+  private async copyFromPod(pod: string, path: string): Promise<void> {
     const directoryName = path.substring(0, path.lastIndexOf('/'));
-    await this.createDirectoriesIfNeeded(pod, directoryName);
-    await this.cp.cpToPod(
-      namespace,
+    await this.createLocalDirectoriesIfNeeded(directoryName);
+    await this.kubernetesService.copyFromPod(
       pod,
       'ixy',
       basename(path),
@@ -84,21 +95,28 @@ export class DistributionService {
     );
   }
 
-  private async createDirectoriesIfNeeded(
+  private async createLocalDirectoriesIfNeeded(path: string): Promise<void> {
+    await fs.promises.mkdir(path, { recursive: true });
+  }
+
+  private async copyToPod(pod: string, path: string): Promise<void> {
+    const directoryName = path.substring(0, path.lastIndexOf('/'));
+    await this.createRemoteDirectoriesIfNeeded(pod, directoryName);
+    await this.kubernetesService.copyToPod(
+      pod,
+      'ixy',
+      basename(path),
+      directoryName,
+      directoryName,
+    );
+  }
+
+  private async createRemoteDirectoriesIfNeeded(
     pod: string,
     path: string,
   ): Promise<void> {
     try {
-      await this.exec.exec(
-        this.namespace,
-        pod,
-        'ixy',
-        ['sh', '-c', `mkdir -p ${path}`],
-        process.stdout,
-        process.stderr,
-        process.stdin,
-        true /* tty */,
-      );
+      await this.kubernetesService.exec(pod, ['mkdir', '-p', path]);
     } catch (err) {
       Logger.error(
         `Failed to create directories ${chalk.bold(path)} in ${chalk.bold(

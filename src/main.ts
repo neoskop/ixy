@@ -12,7 +12,9 @@ async function bootstrap() {
     AppModule,
     new FastifyAdapter({}),
   );
-  app.register(etag as any);
+  app.register(etag as any, {
+    algorithm: 'md5',
+  });
   const configService = app.get(ConfigService);
   await app.listen(configService.get<number>('PORT') || 8080, '0.0.0.0');
 }
