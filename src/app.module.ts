@@ -5,6 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 import { DistributionModule } from './distribution/distribution.module.js';
 import { HealthModule } from './health/health.module.js';
 import { KubernetesModule } from './kubernetes/kubernetes.module.js';
+import { ServeStaticModule } from '@nestjs/serve-static';
 
 @Module({
   imports: [
@@ -13,6 +14,10 @@ import { KubernetesModule } from './kubernetes/kubernetes.module.js';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['config/.env', 'config/.env.default'],
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: '/home/node/app/ui',
+      serveRoot: '/ui',
     }),
     DistributionModule,
     HealthModule,

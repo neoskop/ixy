@@ -70,6 +70,9 @@ spec:
             - name: local-dir
               mountPath: /home/node/app/src
               subPath: src
+            - name: local-dir
+              mountPath: /home/node/app/ui
+              subPath: ui
           {{- end }}
             - name: config
               mountPath: /home/node/app/config/.env
