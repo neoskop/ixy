@@ -94,21 +94,16 @@ export class KubernetesService {
   public async findAllSiblings(): Promise<
     { name: string; ip: string; ready: boolean; phase: string }[]
   > {
-    try {
-      const pods = await this.client.listNamespacedPod(this.namespace);
+    const pods = await this.client.listNamespacedPod(this.namespace);
 
-      return pods.body.items
-        .filter((pod) => pod.metadata.name !== this.currentPodName)
-        .map((pod) => ({
-          name: pod.metadata.name,
-          ip: pod.status.podIP,
-          ready: pod.status.containerStatuses.every((c) => c.ready),
-          phase: pod.status.phase,
-        }));
-    } catch (err) {
-      Logger.error(JSON.stringify(err.body));
-      return [];
-    }
+    return pods.body.items
+      .filter((pod) => pod.metadata.name !== this.currentPodName)
+      .map((pod) => ({
+        name: pod.metadata.name,
+        ip: pod.status.podIP,
+        ready: pod.status.containerStatuses?.every((c) => c.ready),
+        phase: pod.status.phase,
+      }));
   }
 
   public async findReadySiblingNames(): Promise<string[]> {
