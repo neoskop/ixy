@@ -5,10 +5,13 @@ increment=${1:-patch}
 build() {
     cd $1
     version=$(npm version ${increment} --no-git-tag-version)
-    docker build -t neoskop/${1}:${version} .
-    docker push neoskop/${1}:${version}
+    docker build -t neoskop/${2}:${version} .
+    docker push neoskop/${2}:${version}
     cd - &>/dev/null
 }
+
+build frontend ixy
+build backend ixy-ui
 
 git add .
 git commit -m "chore: release ${version}"
