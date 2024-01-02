@@ -19,3 +19,16 @@ develop: true
 config:
   BASE_URL: https://placekitten.com
   REVALIDATE_AFTER: 1
+
+# Set ui service to SvelteKit dev server port
+ui:
+  replicaCount: 1
+  service:
+    port: 5173
+  image:
+    repository: localhost:5000/ixy-ui
+    tag: latest
+    pullPolicy: Always
+  ingress:
+    enabled: true
+    hostname: localhost

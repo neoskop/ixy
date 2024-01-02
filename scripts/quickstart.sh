@@ -27,9 +27,26 @@ containerdConfigPatches:
     endpoint = ["http://${reg_name}:${reg_port}"]
 nodes:
 - role: control-plane
+  kubeadmConfigPatches:
+  - |
+    kind: InitConfiguration
+    nodeRegistration:
+      kubeletExtraArgs:
+        node-labels: "ingress-ready=true"
   extraPortMappings:
+  - containerPort: 80
+    hostPort: 30080
+    listenAddress: "127.0.0.1"
+    protocol: TCP
+  - containerPort: 443
+    hostPort: 30443
+    listenAddress: "127.0.0.1"
+    protocol: TCP
   - containerPort: 30001
     hostPort: 8080
+    listenAddress: "127.0.0.1"
+  - containerPort: 30002
+    hostPort: 5173
     listenAddress: "127.0.0.1"
   extraMounts:
   - hostPath: ${local_dir}
@@ -53,9 +70,26 @@ fi
 
 kubectl config use-context kind-ixy &>/dev/null
 
-# Build and push image
+# Setup NGINX ingress controller
+if ! kubectl get ns ingress-nginx &>/dev/null; then
+  kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+  kubectl wait --namespace ingress-nginx \
+    --for=condition=ready pod \
+    --selector=app.kubernetes.io/component=controller \
+    --timeout=90s
+fi
+
+# Build and push app image
+cd backend
 docker build --target development -t localhost:5000/ixy:latest .
 docker push localhost:5000/ixy:latest
+cd - &>/dev/null
+
+# Build and push ui image
+cd frontend
+docker build --target development -t localhost:5000/ixy-ui:latest .
+docker push localhost:5000/ixy-ui:latest
+cd - &>/dev/null
 
 # Install helm chart
 if ! helm status ixy -n ixy &>/dev/null; then
@@ -65,6 +99,7 @@ else
   helm upgrade ixy -n ixy -f quickstart-values.yaml ./helm
   sleep 3
   kubectl -n ixy rollout restart sts/ixy
+  kubectl -n ixy rollout restart deploy/ixy-ui
 fi
 
 kubectl config set-context --current --namespace=ixy &>/dev/null

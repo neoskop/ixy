@@ -94,7 +94,14 @@ export class KubernetesService {
   public async findAllSiblings(): Promise<
     { name: string; ip: string; ready: boolean; phase: string }[]
   > {
-    const pods = await this.client.listNamespacedPod(this.namespace);
+    const pods = await this.client.listNamespacedPod(
+      this.namespace,
+      null,
+      false,
+      null,
+      null,
+      'app.kubernetes.io/name=ixy',
+    );
 
     return pods.body.items
       .filter((pod) => pod.metadata.name !== this.currentPodName)

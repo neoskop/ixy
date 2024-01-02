@@ -69,10 +69,7 @@ spec:
           {{- if .Values.develop }}
             - name: local-dir
               mountPath: /home/node/app/src
-              subPath: src
-            - name: local-dir
-              mountPath: /home/node/app/ui
-              subPath: ui
+              subPath: backend/src
           {{- end }}
             - name: config
               mountPath: /home/node/app/config/.env

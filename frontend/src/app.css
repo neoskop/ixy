@@ -1,0 +1,97 @@
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+body,
+html {
+	font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono',
+		monospace;
+	font-weight: normal;
+	background: #1b1c2e;
+	color: rgba(255, 255, 255, 0.75);
+}
+
+.contents {
+	padding: 1em;
+}
+
+h1,
+h2,
+h3 {
+	color: #6e87ff;
+	margin: 0.5rem 0;
+}
+
+h3 {
+	font-size: 1.1em;
+	opacity: 0.65;
+}
+
+.cards {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: 1rem;
+}
+
+.card {
+	padding: 1.5rem;
+	min-width: 200px;
+	background: rgb(62, 55, 79);
+	background: linear-gradient(45deg, rgba(62, 55, 79, 0.7) 0%, rgba(53, 53, 73, 0.2) 100%);
+}
+
+.card.not-ready,
+.card.terminating,
+.card.starting,
+.card.failed {
+	opacity: 0.3;
+}
+
+.card.failed {
+	background: rgb(158, 82, 106);
+	background: linear-gradient(45deg, rgb(158, 82, 106, 0.7) 0%, rgba(53, 53, 73, 0.2) 100%);
+}
+
+ul {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+}
+
+li {
+	list-style: none;
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	background-color: rgba(255, 255, 255, 0.05);
+	padding: 0.5rem;
+	flex-basis: calc(50% - 0.5rem);
+	text-align: center;
+}
+
+li > p {
+	font-weight: bold;
+	color: #5becc0;
+}
+
+li.low > p {
+	color: #dc7a69;
+}
+
+li > footer {
+	font-size: 0.75em;
+	opacity: 0.65;
+}
+
+@media screen and (max-width: 1024px) {
+	.cards {
+		flex-direction: column;
+	}
+
+	li {
+		flex-basis: auto;
+		min-width: 200px;
+	}
+}

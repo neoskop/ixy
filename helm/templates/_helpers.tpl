@@ -24,6 +24,42 @@ If release name contains chart name it will be used as a full name.
 {{- end }}
 
 {{/*
+Expand the name of the chart.
+*/}}
+{{- define "ixy.name.ui" -}}
+{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}-ui
+{{- end }}
+
+{{/*
+Create a default fully qualified app name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+If release name contains chart name it will be used as a full name.
+*/}}
+{{- define "ixy.fullname.ui" -}}
+{{- include "ixy.fullname" . }}-ui
+{{- end }}
+
+{{/*
+Selector labels
+*/}}
+{{- define "ixy.selectorLabels.ui" -}}
+app.kubernetes.io/name: {{ include "ixy.name.ui" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
+Common labels
+*/}}
+{{- define "ixy.labels.ui" -}}
+helm.sh/chart: {{ include "ixy.chart" . }}
+{{ include "ixy.selectorLabels.ui" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
+{{/*
 Create chart name and version as used by the chart label.
 */}}
 {{- define "ixy.chart" -}}
