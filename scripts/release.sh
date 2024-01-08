@@ -10,8 +10,8 @@ build() {
     cd - &>/dev/null
 }
 
-build frontend ixy
-build backend ixy-ui
+build frontend ixy-ui
+build backend ixy
 
 git add .
 git commit -m "chore: release ${version}"
