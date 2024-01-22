@@ -1,4 +1,4 @@
-![ixy-logo](./images/logo.png|width=100)
+<img src="https://github.com/neoskop/ixy/blob/main/images/logo.png" width="100">
 
 An **i**mage pro**xy** that can resize images from an upstream server and store the source and target images locally for quick response times. In a Kubernetes cluster with multiple replicas _ixy_ synchronizes the source and target images between all replicas. 
 
