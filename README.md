@@ -1,8 +1,19 @@
-# ixy
+![ixy-logo](./images/logo.png)
 
 An **i**mage pro**xy** that can resize images from an upstream server and store the source and target images locally for quick response times.
 
-## Quickstart
+## Quickstart with KinD
+
+```bash
+$ ./scripts/quickstart.sh
+$ google-chrome http://127.0.0.1:30080 # UI
+$ curl -o /dev/null \
+       -s \
+       -w 'Establish Connection: %{time_connect}s\nTTFB: %{time_starttransfer}s\nTotal: %{time_total}s\n' \
+       http://127.0.0.1:8080/200/200/300/300
+```
+
+## Quickstart with Docker
 
 ```
 $ docker compose up &
@@ -11,6 +22,12 @@ $ curl -o /dev/null \
        -w 'Establish Connection: %{time_connect}s\nTTFB: %{time_starttransfer}s\nTotal: %{time_total}s\n' \
        http://127.0.0.1:8080/200/200/300/300
 ```
+
+## UI
+
+The UI is only available in Kubernetes environment and will reflect the available pods and their synchronization states:
+
+![ixy-ui](./images/ui.png)
 
 ## Environment variables
 
