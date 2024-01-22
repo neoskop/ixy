@@ -23,8 +23,6 @@ config:
 # Set ui service to SvelteKit dev server port
 ui:
   replicaCount: 1
-  service:
-    port: 5173
   image:
     repository: localhost:5000/ixy-ui
     tag: latest

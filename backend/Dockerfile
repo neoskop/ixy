@@ -1,4 +1,5 @@
 FROM node:21.6.0-bookworm AS base
+RUN npm install -g @nestjs/cli
 USER node
 RUN mkdir /home/node/cache
 WORKDIR /home/node/app
@@ -15,4 +16,5 @@ CMD [ "npm", "run", "start:dev" ]
 FROM base AS production
 RUN npm ci --omit=dev
 COPY . .
-CMD [ "npm", "start:prod" ]
+RUN npm run build
+CMD [ "npm", "run", "start:prod" ]

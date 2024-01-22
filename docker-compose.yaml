@@ -3,8 +3,8 @@ services:
   app:
     container_name: ixy
     build:
-      context: .
-      target: development
+      context: backend
+      target: ${TARGET_STAGE}
     environment:
       - FORCE_COLOR=1
       - BASE_URL=https://placekitten.com
@@ -17,8 +17,8 @@ services:
   ui:
     container_name: ixy-ui
     build:
-      context: .
-      target: development
+      context: frontend
+      target: ${TARGET_STAGE}
     ports:
       - "127.0.0.1:5173:5173"
     volumes:

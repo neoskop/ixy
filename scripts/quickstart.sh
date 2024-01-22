@@ -1,23 +1,27 @@
 #!/bin/bash
 set -e
+source .env
 
-# Setup kind cluster
-if ! kind get clusters | grep -o ixy &>/dev/null; then
-  reg_name='kind-registry-ixy'
-  reg_port='5000'
+reg_name='kind-registry-ixy'
+reg_port='5000'
+
+setup_registry() {
   running="$(docker inspect -f '{{.State.Running}}' "${reg_name}" 2>/dev/null || true)"
-
   state=$(docker container ls -a -f name=$reg_name --format="{{.State}}")
   if [ -z "$state" ]; then
     docker run \
       -d --restart=always -p "127.0.0.1:${reg_port}:5000" --name "${reg_name}" \
-      registry:2
-  elif [ "$state" == "exited" ]; then
-    docker start "${reg_name}"
+      registry:2 &>/dev/null
+  elif [ "$state" != "running" ]; then
+    docker start "${reg_name}" &>/dev/null
   fi
+}
 
+setup_registry
+
+# Setup kind cluster
+if ! kind get clusters | grep -o ixy &>/dev/null; then
   local_dir=$(pwd)
-
   cat <<EOF | kind create cluster --name ixy --config=-
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
@@ -73,6 +77,7 @@ kubectl config use-context kind-ixy &>/dev/null
 # Setup NGINX ingress controller
 if ! kubectl get ns ingress-nginx &>/dev/null; then
   kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+  sleep 3
   kubectl wait --namespace ingress-nginx \
     --for=condition=ready pod \
     --selector=app.kubernetes.io/component=controller \
@@ -81,13 +86,13 @@ fi
 
 # Build and push app image
 cd backend
-docker build --target development -t localhost:5000/ixy:latest .
+docker build --target $TARGET_STAGE -t localhost:5000/ixy:latest .
 docker push localhost:5000/ixy:latest
 cd - &>/dev/null
 
 # Build and push ui image
 cd frontend
-docker build --target development -t localhost:5000/ixy-ui:latest .
+docker build --target $TARGET_STAGE -t localhost:5000/ixy-ui:latest .
 docker push localhost:5000/ixy-ui:latest
 cd - &>/dev/null
 

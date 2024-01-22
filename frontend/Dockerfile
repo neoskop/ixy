@@ -3,18 +3,18 @@ USER node
 RUN mkdir /home/node/cache
 WORKDIR /home/node/app
 COPY package*.json ./
-ENV HOST=0.0.0.0
+ENV HOST=0.0.0.0 \
+    PORT=5173
+EXPOSE 5173
 
 FROM base AS development
 ENV DEBUG=true
 RUN npm ci
 COPY --chown=node . .
-EXPOSE 5173
 CMD [ "npm", "run", "dev" ]
 
 FROM base AS production
 RUN npm ci --omit=dev
 COPY --chown=node . .
 RUN npm run build
-EXPOSE 3000
 CMD [ "npm", "run", "prod" ]

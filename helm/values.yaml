@@ -20,7 +20,7 @@ ui:
     tag: ''
   service:
     type: ClusterIP
-    port: 3000
+    port: 5173
   ingress:
     enabled: false
     hostname: ''
