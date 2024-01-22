@@ -13,8 +13,6 @@ RUN npm ci
 COPY --chown=node . .
 CMD [ "npm", "run", "dev" ]
 
-FROM base AS production
-RUN npm ci --omit=dev
-COPY --chown=node . .
+FROM development AS production
 RUN npm run build
 CMD [ "npm", "run", "prod" ]
