@@ -2,17 +2,17 @@
 set -e
 increment=${1:-patch}
 
-build() {
+increment_version() {
     cd $1
     version=$(npm version ${increment} --no-git-tag-version)
-    docker build -t neoskop/${2}:${version} .
-    docker push neoskop/${2}:${version}
     cd - &>/dev/null
 }
 
-build frontend ixy-ui
-build backend ixy
-
+increment_version frontend ixy-ui
+increment_version backend ixy
+msg="chore: release ${version}"
 git add .
-git commit -m "chore: release ${version}"
+git commit -m $msg
+git tag -a $version -m $msg
+git push origin v${version}
 git push
