@@ -14,5 +14,5 @@ msg="chore: release ${version}"
 git add .
 git commit -m "$msg"
 git tag -a $version -m "$msg"
-git push origin v${version}
+git push origin $version
 git push
