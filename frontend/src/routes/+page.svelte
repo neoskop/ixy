@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
+	import prettyBytes from 'pretty-bytes';
 
 	let data: { [key: string]: any } = {};
 	let highestContent = {
@@ -57,6 +58,8 @@
 					<p class="card-header-title">{podName}</p>
 				</h2>
 				{#if data[podName].phase === 'Running' && data[podName].ready}
+					{@const sourceSize = prettyBytes(data[podName].source.size).split(' ')}
+					{@const targetSize = prettyBytes(data[podName].target.size).split(' ')}
 					<div>
 						<h3>Source</h3>
 						<ul>
@@ -65,8 +68,8 @@
 								<footer>#</footer>
 							</li>
 							<li class:low={data[podName].source.size < highestContent.source.size}>
-								<p>{data[podName].source.size}</p>
-								<footer>{data[podName].source.size / 1024 > 1024 ? 'MB' : 'KB'}</footer>
+								<p>{sourceSize[0]}</p>
+								<footer>{sourceSize[1]}</footer>
 							</li>
 						</ul>
 					</div>
@@ -78,8 +81,8 @@
 								<footer>#</footer>
 							</li>
 							<li class:low={data[podName].target.size < highestContent.target.size}>
-								<p>{data[podName].target.size}</p>
-								<footer>{data[podName].target.size / 1024 > 1024 ? 'MB' : 'KB'}</footer>
+								<p>{targetSize[0]}</p>
+								<footer>{targetSize[1]}</footer>
 							</li>
 						</ul>
 					</div>
