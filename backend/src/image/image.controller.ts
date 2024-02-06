@@ -11,6 +11,8 @@ import chalk from 'chalk';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { ImageService } from './image.service.js';
 import { ConfigService } from '@nestjs/config';
+import sharp from 'sharp';
+import { ParsedArgs } from './parsed-args.js';
 
 @Controller('*')
 export class ImageController {
@@ -20,11 +22,13 @@ export class ImageController {
   ) {}
 
   private getParams(request: FastifyRequest) {
-    const urlRegex = /\/(?<width>\d{1,4})\/(?<height>\d{1,4})(?<path>\/(.+))/;
+    const urlRegex =
+      /\/(?<width>\d{1,4})\/(?<height>\d{1,4})(?:\/(?<args>s:[ea]|g:[news]))?(?<path>\/(?:.+))/i;
+
     const {
-      groups: { width, height, path },
+      groups: { width, height, path, args },
     } = RegExp(urlRegex).exec(request.url) || {
-      groups: { width: null, height: null, path: null },
+      groups: { width: null, height: null, path: null, args: null },
     };
 
     const parsedWidth = parseInt(width);
@@ -48,10 +52,13 @@ export class ImageController {
       );
     }
 
+    const parsedArgs = new ParsedArgs(args);
+
     return {
       parsedWidth,
       parsedHeight,
       path,
+      parsedArgs,
     };
   }
 
@@ -60,13 +67,15 @@ export class ImageController {
     @Req() request: FastifyRequest,
     @Res() reply: FastifyReply,
   ) {
-    const { parsedWidth, parsedHeight, path } = this.getParams(request);
+    const { parsedWidth, parsedHeight, path, parsedArgs } =
+      this.getParams(request);
 
     try {
       const resizedImage = await this.imageService.getResizedImage(
         path,
         parsedWidth,
         parsedHeight,
+        parsedArgs,
       );
 
       reply.header('Content-Type', 'image/webp');

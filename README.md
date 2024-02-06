@@ -1,6 +1,6 @@
 <img src="https://github.com/neoskop/ixy/blob/main/images/logo.png" width="100">
 
-An **i**mage pro**xy** that can resize images from an upstream server and store the source and target images locally for quick response times. In a Kubernetes cluster with multiple replicas _ixy_ synchronizes the source and target images between all replicas. 
+An **i**mage pro**xy** that can resize images from an upstream server and store the source and target images locally for quick response times. In a Kubernetes cluster with multiple replicas _ixy_ synchronizes the source and target images between all replicas.
 
 ## Quickstart with KinD
 
@@ -22,6 +22,34 @@ $ curl -o /dev/null \
        -w 'Establish Connection: %{time_connect}s\nTTFB: %{time_starttransfer}s\nTotal: %{time_total}s\n' \
        http://127.0.0.1:8080/200/200/300/300
 ```
+
+## Usage
+
+The URL are parsed as followed:
+
+```
+http://127.0.0.1:8080/200/200/g:n/300/300
+                     |___|___|___|_______|
+                       |   |   |     |
+target image width ----+   |   |     |
+target image height -------+   |     |
+gravity for crop: center ------+     |
+source image path -------------------+
+```
+
+The gravity (`g`) argument is optional and it can also take the following values:
+
+- `n`: North
+- `e`: East
+- `w`: West
+- `s`: South
+
+Instead of gravity you can also use a strategy (`s`) argument:
+
+- `a`: Attention
+- `e`: Entropy
+
+For more details on how crops are applied with these arguments read the [Sharp documentation](https://sharp.pixelplumbing.com/api-resize).
 
 ## UI
 

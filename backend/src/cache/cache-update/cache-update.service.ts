@@ -8,6 +8,7 @@ import { canonicalizeFileName } from '../../util/canonicalize-filename.js';
 import { CacheService } from '../cache.service.js';
 import { TargetService } from '../../image/target/target.service.js';
 import { ConfigService } from '@nestjs/config';
+import { ParsedArgs } from '../../image/parsed-args.js';
 
 @Injectable()
 export class CacheUpdateService {
@@ -33,11 +34,13 @@ export class CacheUpdateService {
       const targetHeight = parseInt(
         RegExp(/\/\d+-(\d+)\.webp$/).exec(imageFile)[1],
       );
+      const parsedArgs = ParsedArgs.fromFileName(imageFile);
       await this.targetService.resizeImage(
         path,
         sourceImageArrayBuffer,
         targetWidth,
         targetHeight,
+        parsedArgs,
       );
       Logger.log(`Updated target image ${chalk.bold(imageFile)}`);
     });

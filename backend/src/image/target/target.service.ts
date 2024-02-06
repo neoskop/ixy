@@ -3,6 +3,7 @@ import sharp from 'sharp';
 import { CacheService } from '../../cache/cache.service.js';
 import { canonicalizeFileName } from '../../util/canonicalize-filename.js';
 import { measured } from '../../util/measured.js';
+import { ParsedArgs } from '../parsed-args.js';
 
 @Injectable()
 export class TargetService {
@@ -12,10 +13,11 @@ export class TargetService {
     path: string,
     parsedWidth: number,
     parsedHeight: number,
+    parsedArgs: ParsedArgs,
   ) {
     const arrayBuffer = await this.cacheService.loadFileFromCache(
       `target/${canonicalizeFileName(path)}`,
-      `${parsedWidth}-${parsedHeight}.webp`,
+      `${parsedWidth}-${parsedHeight}${parsedArgs}.webp`,
     );
 
     if (arrayBuffer) {
@@ -28,16 +30,27 @@ export class TargetService {
     image: ArrayBuffer,
     targetWidth: number,
     targetHeight: number,
+    parsedArgs: ParsedArgs,
   ) {
     try {
+      const resizeOptions: sharp.ResizeOptions = {
+        width: targetWidth,
+        height: targetHeight,
+        fit: sharp.fit.cover,
+      };
+
+      if (parsedArgs.gravity) {
+        resizeOptions.position = parsedArgs.gravity;
+      }
+
+      if (parsedArgs.strategy) {
+        resizeOptions.position = parsedArgs.strategy;
+      }
+
       const arrayBuffer = await measured(
         () =>
           sharp(image)
-            .resize({
-              width: targetWidth,
-              height: targetHeight,
-              fit: sharp.fit.cover,
-            })
+            .resize(resizeOptions)
             .withMetadata()
             .webp({ quality: 80 })
             .toBuffer(),
@@ -45,7 +58,7 @@ export class TargetService {
       );
       await this.cacheService.storeFileInCache(
         `target/${canonicalizeFileName(path)}`,
-        `${targetWidth}-${targetHeight}.webp`,
+        `${targetWidth}-${targetHeight}${parsedArgs}.webp`,
         arrayBuffer,
         Date.now(),
       );
