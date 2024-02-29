@@ -24,9 +24,9 @@ git push
 helm package helm --destination .deploy
 cr upload -o neoskop -r ixy -p .deploy
 git checkout gh-pages
-cr index -i ./index.yaml -p .deploy -o neoskop -r ixy -c https://neoskop.github.io/ixy/
+cr index -i ./index.yaml -p .deploy -o neoskop -r ixy
 git add index.yaml
 git commit -m "chore: Bump version to ${version}."
 git push
-git checkout master
+git checkout main
 rm -rf .deploy/
