@@ -7,7 +7,7 @@ image:
   repository: neoskop/ixy
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: '0.5.0'
+  tag: ''
 ui:
   replicaCount: 2
   enabled: true
@@ -15,7 +15,7 @@ ui:
     repository: neoskop/ixy-ui
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: '0.5.0'
+    tag: ''
   service:
     type: ClusterIP
     port: 5173

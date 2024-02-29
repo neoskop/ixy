@@ -15,8 +15,6 @@ sed -i "s/appVersion: .*/appVersion: \"$version\"/" helm/Chart.yaml
 sed -i "s/version: .*/version: $version/" helm/Chart.yaml
 yq eval ".version=\"$version\"" -i helm/Chart.yaml
 yq eval ".appVersion=\"$version\"" -i helm/Chart.yaml
-yq eval ".image.tag=\"$version\"" -i helm/values.yaml
-yq eval ".ui.image.tag=\"$version\"" -i helm/values.yaml
 git add .
 git commit -m "$msg"
 git tag -a $version -m "$msg"
