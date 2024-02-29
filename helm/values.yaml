@@ -3,13 +3,11 @@
 # Declare variables to be passed into your templates.
 
 replicaCount: 2
-
 image:
   repository: neoskop/ixy
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: ''
-
+  tag: '0.5.0'
 ui:
   replicaCount: 2
   enabled: true
@@ -17,7 +15,7 @@ ui:
     repository: neoskop/ixy-ui
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: ''
+    tag: '0.5.0'
   service:
     type: ClusterIP
     port: 5173
@@ -26,11 +24,9 @@ ui:
     hostname: ''
     annotations: {}
     labels: {}
-
 imagePullSecrets: []
 nameOverride: ''
 fullnameOverride: ''
-
 serviceAccount:
   # Specifies whether a service account should be created
   create: true
@@ -41,59 +37,48 @@ serviceAccount:
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
   name: ''
-
 role:
   name: 'distributor'
-
 # develop mode aka hot reloading
 develop: false
-
 # App config
 config:
   BASE_URL: ''
   DISTRIBUTION: true
-
 podAnnotations: {}
 podLabels: {}
+podSecurityContext: {}
+# fsGroup: 2000
 
-podSecurityContext:
-  {}
-  # fsGroup: 2000
-
-securityContext:
-  {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
+securityContext: {}
+# capabilities:
+#   drop:
+#   - ALL
+# readOnlyRootFilesystem: true
+# runAsNonRoot: true
+# runAsUser: 1000
 
 service:
   type: ClusterIP
   port: 8080
-
 resources:
   limits:
     memory: 256Mi
   requests:
     cpu: 100m
     memory: 128Mi
-
 autoscaling:
   enabled: false
   minReplicas: 1
   maxReplicas: 100
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
-
 cache:
   volume:
-    accessModes: [ "ReadWriteOnce" ]
+    accessModes: ["ReadWriteOnce"]
     resources:
       requests:
         storage: 1Gi
-
 # Additional volumes on the output Deployment definition.
 volumes: []
 # - name: foo
@@ -108,7 +93,5 @@ volumeMounts: []
 #   readOnly: true
 
 nodeSelector: {}
-
 tolerations: []
-
 affinity: {}
