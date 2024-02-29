@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 source .env
 
 reg_name='kind-registry-ixy'
