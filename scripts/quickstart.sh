@@ -1,6 +1,18 @@
 #!/bin/bash
 source .env
 
+max_user_watches=$(cat /proc/sys/fs/inotify/max_user_watches)
+
+if [ "$max_user_watches" -lt 524288 ]; then
+  echo "WARNING: max_user_watches should be at least 524288"
+fi
+
+max_user_instances=$(cat /proc/sys/fs/inotify/max_user_instances)
+
+if [ "$max_user_instances" -lt 512 ]; then
+  echo "WARNING: max_user_instances should be at least 512"
+fi
+
 reg_name='kind-registry-ixy'
 reg_port='5000'
 
