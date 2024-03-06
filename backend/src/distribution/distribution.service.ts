@@ -73,6 +73,10 @@ export class DistributionService implements OnApplicationBootstrap {
       await this.kubernetesService.exec(podName, [
         'find',
         this.configService.get<string>('CACHE_DIR'),
+        '!',
+        '-readable',
+        '-prune',
+        '-o',
         '-type',
         'f',
       ])

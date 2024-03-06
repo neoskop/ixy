@@ -47,8 +47,8 @@ config:
   DISTRIBUTION: true
 podAnnotations: {}
 podLabels: {}
-podSecurityContext: {}
-# fsGroup: 2000
+podSecurityContext:
+  fsGroup: 1000
 
 securityContext: {}
 # capabilities:
