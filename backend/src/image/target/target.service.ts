@@ -34,8 +34,8 @@ export class TargetService {
   ) {
     try {
       const resizeOptions: sharp.ResizeOptions = {
-        width: targetWidth,
-        height: targetHeight,
+        width: targetWidth == 0 ? undefined : targetWidth,
+        height: targetHeight == 0 ? undefined : targetHeight,
         fit: sharp.fit.cover,
       };
 

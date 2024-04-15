@@ -37,6 +37,8 @@ gravity for crop: center ------+     |
 source image path -------------------+
 ```
 
+If image width or height is set to 0 the aspect ratio is retained. If both are 0 the source image is returned.
+
 The gravity (`g`) argument is optional and it can also take the following values:
 
 - `n`: North
