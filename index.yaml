@@ -2,6 +2,16 @@ apiVersion: v1
 entries:
   ixy:
   - apiVersion: v2
+    appVersion: 0.6.0
+    created: "2024-04-15T11:10:44.663415524+02:00"
+    description: Helm chart to deploy ixy cluster
+    digest: 0e65be4e9eb6bc3a5c34b406bb04df985b9be4625150c050e077235dcf34c404
+    name: ixy
+    type: application
+    urls:
+    - https://github.com/neoskop/ixy/releases/download/ixy-0.6.0/ixy-0.6.0.tgz
+    version: 0.6.0
+  - apiVersion: v2
     appVersion: 0.5.1
     created: "2024-03-06T16:17:13.0785418+01:00"
     description: Helm chart to deploy ixy cluster
@@ -21,4 +31,4 @@ entries:
     urls:
     - https://github.com/neoskop/ixy/releases/download/ixy-0.5.0/ixy-0.5.0.tgz
     version: 0.5.0
-generated: "2024-03-06T16:17:13.07855912+01:00"
+generated: "2024-04-15T11:10:44.663443485+02:00"
