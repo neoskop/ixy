@@ -4,6 +4,7 @@ import chalk from 'chalk';
 import fs from 'fs';
 import { basename } from 'path';
 import { KubernetesService } from '../kubernetes/kubernetes.service.js';
+import pRetry from 'p-retry';
 
 @Injectable()
 export class DistributionService implements OnApplicationBootstrap {
@@ -34,7 +35,13 @@ export class DistributionService implements OnApplicationBootstrap {
       return;
     }
 
-    await this.copyFileFromPod(podNames[0]);
+    try {
+      await this.copyFilesFromPod(podNames[0]);
+    } catch (err) {
+      Logger.error(
+        `Failed to copy files from ${this.getPodLogColor(podNames[0])(podNames[0])}: ${err.message}`,
+      );
+    }
   }
 
   private isDistributionEnabled() {
@@ -59,16 +66,24 @@ export class DistributionService implements OnApplicationBootstrap {
       await this.kubernetesService.findReadySiblingNames();
 
     for (const podName of siblingPodNames) {
-      await this.copyToPod(podName, path);
-      Logger.log(
-        `Distributed ${chalk.bold(path)} to ${this.getPodLogColor(podName)(
-          podName,
-        )}`,
-      );
+      try {
+        await this.copyToPod(podName, path);
+        Logger.log(
+          `Distributed ${chalk.bold(path)} to ${this.getPodLogColor(podName)(
+            podName,
+          )}`,
+        );
+      } catch (err) {
+        Logger.error(
+          `Failed to distribute ${chalk.bold(path)} to ${this.getPodLogColor(
+            podName,
+          )(podName)}: ${err.message}`,
+        );
+      }
     }
   }
 
-  private async copyFileFromPod(podName: string) {
+  private async copyFilesFromPod(podName: string) {
     const files = (
       await this.kubernetesService.exec(podName, [
         'find',
@@ -81,21 +96,60 @@ export class DistributionService implements OnApplicationBootstrap {
         'f',
       ])
     ).filter(Boolean);
-    for (const file of files) {
-      Logger.debug(`Copying ${chalk.bold(file)} from ${chalk.bold(podName)}`);
-      await this.copyFromPod(podName, file);
+
+    const copyBatchSize = Number(
+      this.configService.get<string>('COPY_BATCH_SIZE'),
+    );
+
+    for (let i = 0; i < files.length; i += copyBatchSize) {
+      const fileBatch = files.slice(i, i + copyBatchSize);
+      Logger.debug(
+        `Copying ${chalk.bold(
+          fileBatch.length,
+        )} files from ${chalk.bold(podName)}`,
+      );
+
+      await Promise.all(
+        fileBatch.map(async (file) => {
+          try {
+            Logger.debug(`Copying ${chalk.bold(file)}`);
+            await this.copyFromPod(podName, file);
+          } catch (err) {
+            Logger.error(
+              `Failed to copy ${chalk.bold(file)} from ${chalk.bold(
+                podName,
+              )}: ${err.message}`,
+            );
+          }
+        }),
+      );
     }
   }
 
   private async copyFromPod(pod: string, path: string): Promise<void> {
     const directoryName = path.substring(0, path.lastIndexOf('/'));
-    await this.createLocalDirectoriesIfNeeded(directoryName);
-    await this.kubernetesService.copyFromPod(
-      pod,
-      'ixy',
-      basename(path),
-      directoryName,
-      directoryName,
+
+    await pRetry(
+      async () => {
+        await this.createLocalDirectoriesIfNeeded(directoryName);
+        await this.kubernetesService.copyFromPod(
+          pod,
+          'ixy',
+          basename(path),
+          directoryName,
+          directoryName,
+        );
+      },
+      {
+        retries: Number(this.configService.get<string>('COPY_RETRY_COUNT')),
+        minTimeout: 1000,
+        maxTimeout:
+          Math.pow(
+            2,
+            Number(this.configService.get<string>('COPY_RETRY_COUNT')),
+          ) * 1000,
+        randomize: true,
+      },
     );
   }
 
@@ -105,13 +159,25 @@ export class DistributionService implements OnApplicationBootstrap {
 
   private async copyToPod(pod: string, path: string): Promise<void> {
     const directoryName = path.substring(0, path.lastIndexOf('/'));
-    await this.createRemoteDirectoriesIfNeeded(pod, directoryName);
-    await this.kubernetesService.copyToPod(
-      pod,
-      'ixy',
-      basename(path),
-      directoryName,
-      directoryName,
+    const retries = Number(this.configService.get<string>('COPY_RETRY_COUNT'));
+
+    await pRetry(
+      async () => {
+        await this.createRemoteDirectoriesIfNeeded(pod, directoryName);
+        await this.kubernetesService.copyToPod(
+          pod,
+          'ixy',
+          basename(path),
+          directoryName,
+          directoryName,
+        );
+      },
+      {
+        retries,
+        minTimeout: 1000,
+        maxTimeout: Math.pow(2, retries) * 1000,
+        randomize: true,
+      },
     );
   }
 
