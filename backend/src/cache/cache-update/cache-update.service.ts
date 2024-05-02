@@ -9,6 +9,7 @@ import { CacheService } from '../cache.service.js';
 import { TargetService } from '../../image/target/target.service.js';
 import { ConfigService } from '@nestjs/config';
 import { ParsedArgs } from '../../image/parsed-args.js';
+import { Stats } from 'node:fs';
 
 @Injectable()
 export class CacheUpdateService {
@@ -62,7 +63,14 @@ export class CacheUpdateService {
       'CACHE_DIR',
     )}/src/${canonicalizeFileName(path)}`;
 
-    const stats = await fs.stat(fullPath);
+    let stats: Stats;
+
+    try {
+      stats = await fs.stat(fullPath);
+    } catch (e) {
+      return;
+    }
+
     if (
       stats.ctime.getTime() >=
       Date.now() -
