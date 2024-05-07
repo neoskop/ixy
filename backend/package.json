@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@fastify/etag": "5.2.0",
-    "@fastify/static": "7.0.3",
+    "@fastify/static": "7.0.4",
     "@kubernetes/client-node": "0.20.0",
     "@nestjs/common": "^10.3.8",
     "@nestjs/config": "3.2.2",
