@@ -132,13 +132,7 @@ export class DistributionService implements OnApplicationBootstrap {
     await pRetry(
       async () => {
         await this.createLocalDirectoriesIfNeeded(directoryName);
-        await this.kubernetesService.copyFromPod(
-          pod,
-          'ixy',
-          basename(path),
-          directoryName,
-          directoryName,
-        );
+        await this.kubernetesService.copyFromPod(pod, 'ixy', path);
       },
       {
         retries: Number(this.configService.get<string>('COPY_RETRY_COUNT')),
@@ -164,13 +158,7 @@ export class DistributionService implements OnApplicationBootstrap {
     await pRetry(
       async () => {
         await this.createRemoteDirectoriesIfNeeded(pod, directoryName);
-        await this.kubernetesService.copyToPod(
-          pod,
-          'ixy',
-          basename(path),
-          directoryName,
-          directoryName,
-        );
+        await this.kubernetesService.copyToPod(pod, 'ixy', path);
       },
       {
         retries,

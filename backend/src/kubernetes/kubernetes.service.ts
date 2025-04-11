@@ -1,60 +1,40 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import k8s from '@kubernetes/client-node';
+import { CoreV1Api, Cp, Exec, KubeConfig } from '@kubernetes/client-node';
 import { Writable } from 'stream';
 import chalk from 'chalk';
 
 @Injectable()
 export class KubernetesService {
-  private kubeConfig: k8s.KubeConfig;
-  private client: k8s.CoreV1Api;
-  private cp: k8s.Cp;
-  private executor: k8s.Exec;
+  private kubeConfig: KubeConfig;
+  private client: CoreV1Api;
+  private cp: Cp;
+  private executor: Exec;
   public namespace: string;
   public currentPodName: string;
 
   constructor(private readonly configService: ConfigService) {
-    this.kubeConfig = new k8s.KubeConfig();
+    this.kubeConfig = new KubeConfig();
     this.kubeConfig.loadFromCluster();
-    this.client = this.kubeConfig.makeApiClient(k8s.CoreV1Api);
-    this.cp = new k8s.Cp(this.kubeConfig);
-    this.executor = new k8s.Exec(this.kubeConfig);
+    this.client = this.kubeConfig.makeApiClient(CoreV1Api);
+    this.cp = new Cp(this.kubeConfig);
+    this.executor = new Exec(this.kubeConfig);
     this.namespace = this.configService.get<string>('MY_POD_NAMESPACE');
     this.currentPodName = this.configService.get<string>('MY_POD_NAME');
   }
 
-  public copyFromPod(
-    podName: string,
-    containerName: string,
-    sourcePath: string,
-    targetPath: string,
-    cwd: string,
-  ) {
+  public copyFromPod(podName: string, containerName: string, path: string) {
     return this.cp.cpFromPod(
       this.namespace,
       podName,
       containerName,
-      sourcePath,
-      targetPath,
-      cwd,
+      path,
+      path,
     );
   }
 
-  public copyToPod(
-    podName: string,
-    containerName: string,
-    sourcePath: string,
-    targetPath: string,
-    cwd: string,
-  ) {
-    return this.cp.cpToPod(
-      this.namespace,
-      podName,
-      containerName,
-      sourcePath,
-      targetPath,
-      cwd,
-    );
+  public copyToPod(podName: string, containerName: string, path: string) {
+    return this.cp.cpToPod(this.namespace, podName, containerName, path, path);
   }
 
   public async exec(podName: string, command: string[]) {
@@ -94,16 +74,12 @@ export class KubernetesService {
   public async findAllSiblings(): Promise<
     { name: string; ip: string; ready: boolean; phase: string }[]
   > {
-    const pods = await this.client.listNamespacedPod(
-      this.namespace,
-      null,
-      false,
-      null,
-      null,
-      'app.kubernetes.io/name=ixy',
-    );
+    const pods = await this.client.listNamespacedPod({
+      namespace: this.namespace,
+      labelSelector: 'app.kubernetes.io/name=ixy',
+    });
 
-    return pods.body.items
+    return pods.items
       .filter((pod) => pod.metadata.name !== this.currentPodName)
       .map((pod) => ({
         name: pod.metadata.name,
