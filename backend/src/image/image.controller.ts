@@ -84,7 +84,6 @@ export class ImageController {
         `public, max-age=${
           60 *
           60 *
-          24 *
           Number(this.configService.getOrThrow<string>('CACHE_CONTROL_MAX_AGE'))
         }`,
       );
