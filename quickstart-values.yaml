@@ -17,7 +17,7 @@ resources:
 develop: true
 
 config:
-  BASE_URL: https://source.unsplash.com/random/
+  BASE_URL: https://picsum.photos/
   REVALIDATE_AFTER: 1
 
 # Set ui service to SvelteKit dev server port
