@@ -13,10 +13,6 @@ export class CacheStatusService {
   ) {}
 
   public async statusAll() {
-    if (this.configService.get<string>('DISTRIBUTION') !== 'true') {
-      return {};
-    }
-
     const result = {};
     result[this.kubernetesService.currentPodName] = {
       phase: 'Running',
