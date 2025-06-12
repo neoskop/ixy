@@ -31,7 +31,7 @@
     "axios": "1.9.0",
     "chalk": "5.4.1",
     "fast-glob": "3.3.3",
-    "fastify": "5.3.3",
+    "fastify": "5.4.0",
     "p-retry": "6.2.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
