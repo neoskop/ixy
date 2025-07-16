@@ -1,4 +1,4 @@
-FROM node:22.17.0-bookworm AS base
+FROM node:22.17.1-bookworm AS base
 USER node
 RUN mkdir /home/node/cache
 WORKDIR /home/node/app
