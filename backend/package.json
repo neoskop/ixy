@@ -41,7 +41,7 @@
     "@nestjs/cli": "^11.0.6",
     "@nestjs/schematics": "^11.0.5",
     "@nestjs/testing": "^11.0.15",
-    "@types/async": "3.2.24",
+    "@types/async": "3.2.25",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.14.0",
     "@types/supertest": "^6.0.3",
