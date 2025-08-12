@@ -35,6 +35,6 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"pretty-bytes": "7.0.0"
+		"pretty-bytes": "7.0.1"
 	}
 }
