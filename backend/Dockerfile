@@ -1,4 +1,4 @@
-FROM node:24.11.0-bookworm AS base
+FROM node:24.11.1-bookworm AS base
 RUN npm install -g @nestjs/cli
 USER node
 RUN mkdir /home/node/cache
