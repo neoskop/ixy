@@ -11,7 +11,7 @@ jobs:
     if: "!contains(github.ref_name, 'ixy-')"   # skip builds if tag contains 'ixy-'
     steps:
       - name: Checkout source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -41,7 +41,7 @@ jobs:
     if: "!contains(github.ref_name, 'ixy-')"   # skip builds if tag contains 'ixy-'
     steps:
       - name: Checkout source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
