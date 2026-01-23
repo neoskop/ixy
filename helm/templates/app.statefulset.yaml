@@ -9,6 +9,7 @@ spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
+  podManagementPolicy: Parallel
   selector:
     matchLabels:
       {{- include "ixy.selectorLabels" . | nindent 6 }}
