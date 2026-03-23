@@ -30,7 +30,7 @@ export class CacheService {
   public async storeFileInCache(
     directory: string,
     fileName: string,
-    arrayBuffer: ArrayBuffer,
+    arrayBuffer: Buffer | ArrayBuffer,
     lastModified: string | number,
   ) {
     const fullDir = `${this.configService.getOrThrow<string>(
@@ -40,7 +40,7 @@ export class CacheService {
 
     await measured(async () => {
       await fs.mkdir(fullDir, { recursive: true });
-      await fs.writeFile(fullPath, Buffer.from(arrayBuffer));
+      await fs.writeFile(fullPath, Buffer.isBuffer(arrayBuffer) ? arrayBuffer : Buffer.from(arrayBuffer));
       if (lastModified) {
         const lastModifiedDate = new Date(lastModified);
         Logger.debug(

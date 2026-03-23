@@ -27,7 +27,7 @@ export class TargetService {
 
   public async resizeImage(
     path: string,
-    image: ArrayBuffer,
+    image: Buffer | ArrayBuffer,
     targetWidth: number,
     targetHeight: number,
     parsedArgs: ParsedArgs,

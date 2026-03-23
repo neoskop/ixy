@@ -43,7 +43,7 @@ export class ImageService {
         return forwardedImage;
       }
 
-      let resizedImage = await this.targetService.fetchExistingTargetImage(
+      let resizedImage: Buffer | undefined = await this.targetService.fetchExistingTargetImage(
         path,
         parsedWidth,
         parsedHeight,
