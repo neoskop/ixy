@@ -22,7 +22,7 @@ git push origin $version
 git push
 
 helm package helm --destination .deploy
-cr upload -o neoskop -r ixy -p .deploy
+cr --config ~/.cr.yaml upload -o neoskop -r ixy -p .deploy
 git checkout gh-pages
 cr index -i ./index.yaml -p .deploy -o neoskop -r ixy
 git add index.yaml
