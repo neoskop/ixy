@@ -25,7 +25,7 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
-      terminationGracePeriodSeconds: {{ .Values.develop | ternary 0 10 }}
+      terminationGracePeriodSeconds: {{ .Values.develop | ternary 0 30 }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -47,6 +47,8 @@ spec:
             httpGet:
               path: /health/liveness
               port: http
+            timeoutSeconds: 5
+            failureThreshold: 10
           readinessProbe:
             httpGet:
               path: /health/readiness
