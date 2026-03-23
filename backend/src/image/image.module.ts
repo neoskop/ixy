@@ -5,10 +5,17 @@ import { TargetModule } from './target/target.module.js';
 import { ImageController } from './image.controller.js';
 import { CacheModule } from '../cache/cache.module.js';
 import { CacheUpdateModule } from '../cache/cache-update/cache-update.module.js';
+import { ClusterModule } from '../cluster/cluster.module.js';
 
 @Module({
   providers: [ImageService],
-  imports: [SourceModule, TargetModule, CacheModule, CacheUpdateModule],
+  imports: [
+    SourceModule,
+    TargetModule,
+    CacheModule,
+    CacheUpdateModule,
+    ClusterModule,
+  ],
   controllers: [ImageController],
 })
 export class ImageModule {}

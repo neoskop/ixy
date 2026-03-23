@@ -4,14 +4,10 @@ import fs from 'fs/promises';
 import { measured } from '../util/measured.js';
 import { canonicalizeFileName } from '../util/canonicalize-filename.js';
 import { ConfigService } from '@nestjs/config';
-import { DistributionService } from '../distribution/distribution.service.js';
 
 @Injectable()
 export class CacheService {
-  constructor(
-    private readonly configService: ConfigService,
-    private readonly distributionService: DistributionService,
-  ) {}
+  constructor(private readonly configService: ConfigService) {}
 
   public async loadFileFromCache(directory: string, fileName: string) {
     const fullPath = `${this.configService.getOrThrow<string>(
@@ -55,6 +51,5 @@ export class CacheService {
         await fs.utimes(fullPath, Date.now(), lastModifiedDate);
       }
     }, `Wrote image to cache under ${chalk.bold(fullPath)}`);
-    await this.distributionService.distribute(fullPath);
   }
 }

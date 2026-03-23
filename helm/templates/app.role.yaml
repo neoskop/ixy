@@ -6,8 +6,5 @@ metadata:
     {{- include "ixy.labels" . | nindent 4 }}
 rules:
 - apiGroups: [""]
-  resources: ["pods/exec"]
-  verbs: ["*"]
-- apiGroups: [""]
   resources: ["pods"]
   verbs: ["get", "list"]

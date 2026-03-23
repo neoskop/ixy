@@ -1,6 +1,6 @@
 <img src="https://github.com/neoskop/ixy/blob/main/images/logo.png" width="100">
 
-An **i**mage pro**xy** that can resize images from an upstream server and store the source and target images locally for quick response times. In a Kubernetes cluster with multiple replicas _ixy_ synchronizes the source and target images between all replicas.
+An **i**mage pro**xy** that can resize images from an upstream server and store the source and target images locally for quick response times. In a Kubernetes cluster with multiple replicas _ixy_ uses rendezvous hashing (replication factor 2) to route requests to owner pods instead of copying caches between replicas.
 
 ## Quickstart with KinD
 
@@ -55,7 +55,7 @@ For more details on how crops are applied with these arguments read the [Sharp d
 
 ## UI
 
-The UI is only available in Kubernetes environment and will reflect the available pods and their synchronization states:
+The UI is only available in Kubernetes environment and will reflect the available pods and their cache status:
 
 ![ixy-ui](./images/ui.png)
 
@@ -71,3 +71,4 @@ The UI is only available in Kubernetes environment and will reflect the availabl
 - `MAX_REDIRECTS`: The maximum number of redirects when fetching source images (Default: `5`)
 - `CACHE_DIR`: The directory to store the source and target images in (Default: `/home/node/cache`)
 - `CACHE_CONTROL_MAX_AGE`: The maximum age of the cache in hours (Default: `1`)
+- `CLUSTER_MODE`: Enable cluster-aware routing in Kubernetes (Default: `false`)

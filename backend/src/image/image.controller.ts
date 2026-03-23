@@ -11,7 +11,6 @@ import chalk from 'chalk';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { ImageService } from './image.service.js';
 import { ConfigService } from '@nestjs/config';
-import sharp from 'sharp';
 import { ParsedArgs } from './parsed-args.js';
 
 @Controller('*')
@@ -71,11 +70,17 @@ export class ImageController {
       this.getParams(request);
 
     try {
+      const forwardedByHeader = request.headers['x-ixy-forwarded-by'];
+      const forwardedBy = Array.isArray(forwardedByHeader)
+        ? forwardedByHeader[0]
+        : forwardedByHeader;
       const resizedImage = await this.imageService.getResizedImage(
         path,
         parsedWidth,
         parsedHeight,
         parsedArgs,
+        request.url,
+        forwardedBy,
       );
 
       reply.header('Content-Type', 'image/webp');

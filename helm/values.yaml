@@ -44,7 +44,7 @@ develop: false
 # App config
 config:
   BASE_URL: ''
-  DISTRIBUTION: true
+  CLUSTER_MODE: true
 podAnnotations: {}
 podLabels: {}
 podSecurityContext:
