@@ -13,14 +13,5 @@ services:
     volumes:
       - ./backend/src:/home/node/app/src:ro
       - cache:/home/node/cache
-  ui:
-    container_name: ixy-ui
-    build:
-      context: frontend
-      target: ${TARGET_STAGE}
-    ports:
-      - "127.0.0.1:5173:5173"
-    volumes:
-      - ./frontend/src:/home/node/app/src:ro
 volumes:
   cache:

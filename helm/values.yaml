@@ -8,22 +8,6 @@ image:
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ''
-ui:
-  replicaCount: 2
-  enabled: true
-  image:
-    repository: neoskop/ixy-ui
-    pullPolicy: IfNotPresent
-    # Overrides the image tag whose default is the chart appVersion.
-    tag: ''
-  service:
-    type: ClusterIP
-    port: 5173
-  ingress:
-    enabled: false
-    hostname: ''
-    annotations: {}
-    labels: {}
 imagePullSecrets: []
 nameOverride: ''
 fullnameOverride: ''

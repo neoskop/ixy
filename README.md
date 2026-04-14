@@ -6,7 +6,6 @@ An **i**mage pro**xy** that can resize images from an upstream server and store 
 
 ```bash
 $ ./scripts/quickstart.sh
-$ google-chrome http://127.0.0.1:30080 # UI
 $ curl -o /dev/null \
        -s \
        -w 'Establish Connection: %{time_connect}s\nTTFB: %{time_starttransfer}s\nTotal: %{time_total}s\n' \
@@ -52,12 +51,6 @@ Instead of gravity you can also use a strategy (`s`) argument:
 - `e`: Entropy
 
 For more details on how crops are applied with these arguments read the [Sharp documentation](https://sharp.pixelplumbing.com/api-resize).
-
-## UI
-
-The UI is only available in Kubernetes environment and will reflect the available pods and their cache status:
-
-![ixy-ui](./images/ui.png)
 
 ## Environment variables
 

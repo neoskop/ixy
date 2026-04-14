@@ -49,12 +49,8 @@ jobs:
       - name: Bump version
         id: bump
         run: |
-          cd frontend
-          raw=$(npm version ${{ github.event.inputs.bump }} --no-git-tag-version)
-          cd ..
-
           cd backend
-          npm version ${{ github.event.inputs.bump }} --no-git-tag-version
+          raw=$(npm version ${{ github.event.inputs.bump }} --no-git-tag-version)
           cd ..
 
           # Strip v prefix from npm version output
@@ -66,7 +62,7 @@ jobs:
 
       - name: Commit and push version bump
         run: |
-          git add helm/Chart.yaml frontend/package.json frontend/package-lock.json backend/package.json backend/package-lock.json
+          git add helm/Chart.yaml backend/package.json
           git commit -m "chore: release v${{ steps.bump.outputs.version }}"
           git push origin main
 

@@ -60,9 +60,6 @@ nodes:
   - containerPort: 30001
     hostPort: 8080
     listenAddress: "127.0.0.1"
-  - containerPort: 30002
-    hostPort: 5173
-    listenAddress: "127.0.0.1"
   extraMounts:
   - hostPath: ${local_dir}
     containerPath: /ixy
@@ -101,12 +98,6 @@ docker build --target $TARGET_STAGE -t localhost:5000/ixy:latest .
 docker push localhost:5000/ixy:latest
 cd - &>/dev/null
 
-# Build and push ui image
-cd frontend
-docker build --target $TARGET_STAGE -t localhost:5000/ixy-ui:latest .
-docker push localhost:5000/ixy-ui:latest
-cd - &>/dev/null
-
 # Install helm chart
 if ! helm status ixy -n ixy &>/dev/null; then
   kubectl create ns ixy
@@ -115,7 +106,6 @@ else
   helm upgrade ixy -n ixy -f quickstart-values.yaml ./helm
   sleep 3
   kubectl -n ixy rollout restart sts/ixy
-  kubectl -n ixy rollout restart deploy/ixy-ui
 fi
 
 kubectl config set-context --current --namespace=ixy &>/dev/null

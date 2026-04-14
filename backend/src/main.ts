@@ -6,8 +6,11 @@ import {
 import { AppModule } from './app.module.js';
 import etag from '@fastify/etag';
 import { ConfigService } from '@nestjs/config';
+import sharp from 'sharp';
 
 async function bootstrap() {
+  sharp.cache({ memory: 50, files: 10, items: 50 });
+  sharp.concurrency(1);
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter({}),
