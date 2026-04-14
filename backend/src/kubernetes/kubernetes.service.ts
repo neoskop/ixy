@@ -17,13 +17,6 @@ export class KubernetesService {
     this.currentPodName = this.configService.get<string>('MY_POD_NAME');
   }
 
-  public async findAllSiblings(): Promise<
-    { name: string; ip: string; ready: boolean; phase: string }[]
-  > {
-    const pods = await this.listPods();
-    return pods.filter((pod) => pod.name !== this.currentPodName);
-  }
-
   public async findReadyPods(): Promise<
     { name: string; ip: string; ready: boolean; phase: string }[]
   > {

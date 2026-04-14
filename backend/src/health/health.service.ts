@@ -2,13 +2,9 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class HealthService {
-  public ready = true; // set to false later and set upon init
+  public ready = true;
 
-  public setReady() {
-    this.ready = true;
-  }
-
-  public async isReady(): Promise<boolean> {
+  public isReady(): boolean {
     return this.ready;
   }
 }

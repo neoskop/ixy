@@ -42,7 +42,7 @@ export class ParsedArgs {
     const regex = /-(g-[news]|s-[ea])\.webp$/;
     const match = imageFile.match(regex);
     if (match) {
-      return new ParsedArgs(match[1]);
+      return new ParsedArgs(match[1].replace('-', ':'));
     } else {
       return new ParsedArgs(null);
     }

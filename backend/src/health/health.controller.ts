@@ -7,7 +7,7 @@ export class HealthController {
   constructor(private readonly healthService: HealthService) {}
 
   @Get('readiness')
-  public async readiness(@Res() res: FastifyReply) {
+  public readiness(@Res() res: FastifyReply) {
     const isReady = this.healthService.isReady();
     res
       .status(isReady ? HttpStatus.OK : HttpStatus.SERVICE_UNAVAILABLE)
@@ -20,7 +20,7 @@ export class HealthController {
   }
 
   @Get('startup')
-  public async startup(@Res() res: FastifyReply) {
+  public startup(@Res() res: FastifyReply) {
     return this.readiness(res);
   }
 }
