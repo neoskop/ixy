@@ -3,7 +3,7 @@ RUN apk add --no-cache tini && corepack enable && corepack prepare pnpm@latest -
 USER node
 RUN mkdir /home/node/cache
 WORKDIR /home/node/app
-COPY package.json pnpm-lock.yaml ./
+COPY --chown=node:node package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 EXPOSE 8080
 VOLUME [ "/home/node/cache" ]
 ENTRYPOINT [ "/sbin/tini", "--" ]
@@ -11,11 +11,11 @@ ENTRYPOINT [ "/sbin/tini", "--" ]
 FROM base AS development
 ENV DEBUG=true
 RUN pnpm install --frozen-lockfile
-COPY . .
+COPY --chown=node:node . .
 CMD [ "pnpm", "start:dev" ]
 
 FROM base AS production
 RUN pnpm install --frozen-lockfile
-COPY . .
+COPY --chown=node:node . .
 RUN pnpm build && pnpm prune --prod
 CMD [ "pnpm", "start:prod" ]

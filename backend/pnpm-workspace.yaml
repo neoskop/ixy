@@ -1,0 +1,7 @@
+# pnpm 11 refuses to install unless every dependency with a build script has
+# an explicit allow/deny decision. Only sharp needs its script; the others are
+# not required at runtime.
+allowBuilds:
+  sharp: true
+  "@nestjs/core": false
+  unrs-resolver: false
