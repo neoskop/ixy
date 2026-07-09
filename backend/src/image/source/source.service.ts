@@ -3,6 +3,7 @@ import axios from 'axios';
 import chalk from 'chalk';
 import { CacheService } from '../../cache/cache.service.js';
 import { measured } from '../../util/measured.js';
+import { isImage } from '../../util/is-image.js';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -43,23 +44,21 @@ export class SourceService {
 
   public async fetchSourceImage(path: string, loadFromCache = true) {
     const url = `${this.configService.getOrThrow<string>('BASE_URL')}${path}`;
-    let arrayBuffer = loadFromCache
+    const cached = loadFromCache
       ? await this.cacheService.loadFileFromCache('src', path)
       : null;
 
-    if (arrayBuffer) {
-      return arrayBuffer;
-    } else {
-      let lastModified: string;
-
-      ({ lastModified, arrayBuffer } = await this.downloadSourceImage(url));
-      await this.cacheService.storeFileInCache(
-        'src',
-        path,
-        arrayBuffer,
-        lastModified,
-      );
+    // Ignore cache entries that aren't images (e.g. an upstream error page
+    // wrongly cached on a past download) so they get re-fetched and healed.
+    if (cached && (await isImage(cached))) {
+      return cached;
     }
+
+    const { lastModified, arrayBuffer } = await this.downloadSourceImage(url);
+    if (!(await isImage(arrayBuffer))) {
+      throw new NotFoundException(`Source is not an image`);
+    }
+    await this.cacheService.storeFileInCache('src', path, arrayBuffer, lastModified);
 
     return arrayBuffer;
   }

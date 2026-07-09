@@ -5,6 +5,7 @@ import chalk from 'chalk';
 import fs from 'fs/promises';
 import axios, { AxiosResponse } from 'axios';
 import { canonicalizeFileName } from '../../util/canonicalize-filename.js';
+import { isImage } from '../../util/is-image.js';
 import { CacheService } from '../cache.service.js';
 import { TargetService } from '../../image/target/target.service.js';
 import { ConfigService } from '@nestjs/config';
@@ -48,6 +49,14 @@ export class CacheUpdateService {
   }
 
   private async updateCachedImages(response: AxiosResponse, path: string) {
+    // Don't let an upstream error page (e.g. HTML) overwrite a good cached
+    // image or blow up sharp during the background resize.
+    if (!(await isImage(response.data))) {
+      Logger.warn(
+        `Upstream response for ${chalk.bold(path)} is not an image, keeping existing cache`,
+      );
+      return;
+    }
     await this.cacheService.storeFileInCache(
       'src',
       path,
