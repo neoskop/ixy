@@ -36,7 +36,7 @@
     "sharp": "0.34.5"
   },
   "devDependencies": {
-    "@nestjs/cli": "^11.0.16",
+    "@nestjs/cli": "^11.0.23",
     "@nestjs/schematics": "^11.1.0",
     "@nestjs/testing": "^11.1.17",
     "@types/async": "3.2.25",
