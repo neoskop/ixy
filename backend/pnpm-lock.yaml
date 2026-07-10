@@ -52,7 +52,7 @@ importers:
         version: 0.34.5
     devDependencies:
       '@nestjs/cli':
-        specifier: ^11.0.16
+        specifier: ^11.0.23
         version: 11.0.23(@types/node@24.13.3)(prettier@3.9.4)
       '@nestjs/schematics':
         specifier: ^11.1.0
