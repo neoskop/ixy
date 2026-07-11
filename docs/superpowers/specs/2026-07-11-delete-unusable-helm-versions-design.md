@@ -14,8 +14,13 @@ Confirmed live examples at time of writing: chart versions **2.1.0** and
 **1.0.0** exist in the index but have no matching `neoskop/ixy` image tag on
 Docker Hub.
 
+Separately, chart versions up to and including **1.0.x** bundle a second,
+long-deprecated image `neoskop/ixy-ui` (referenced as `repository: neoskop/ixy-ui`
+in the chart's `values.yaml`; the UI was removed in the 2.0.0 chart). Any chart
+that still references that image at all is also considered unusable.
+
 We want a "Delete unusable versions" action that finds every published chart
-version whose referenced image is missing and removes it.
+version that is unusable — by either criterion — and removes it.
 
 ## Definitions
 
@@ -25,8 +30,11 @@ version whose referenced image is missing and removes it.
   `{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}`.
   Released charts never override `image.tag` or `image.repository`, so the image
   is always `neoskop/ixy:<appVersion>`.
-- **Unusable version**: a chart version whose `appVersion` is not present in the
-  Docker Hub tag list for `neoskop/ixy`.
+- **Deprecated UI image**: `neoskop/ixy-ui`, bundled by charts up to 1.0.x.
+- **Unusable version**: a chart version that meets **either** criterion:
+  1. its `appVersion` is not present in the Docker Hub tag list for `neoskop/ixy`
+     (missing backend image), **or**
+  2. its packaged chart references `neoskop/ixy-ui` at all (deprecated UI image).
 
 ## How publishing works today (reverse of what we must undo)
 
@@ -53,13 +61,21 @@ Three files, mirroring the existing `release.yml` + `scripts/release.sh` convent
 - Fetches all Docker Hub tags for `neoskop/ixy` via
   `https://hub.docker.com/v2/repositories/neoskop/ixy/tags?page_size=100`,
   following `.next` until exhausted, into a set of tag names.
-- Reads `.entries.ixy[]` from the given index; for each, checks whether its
-  `appVersion` is in the tag set.
+- Reads `.entries.ixy[]` from the given index. For each version, marks it
+  unusable if **either**:
+  1. its `appVersion` is not in the tag set, **or**
+  2. its packaged chart references the UI image. The chart `.tgz` is streamed
+     from `.urls[0]` and inspected without writing to disk:
+     `curl -sfL "$url" | tar xzO | grep -q 'neoskop/ixy-ui'`.
 - Prints each unusable `version` on its own line to stdout (nothing else on
-  stdout, so callers can consume it directly). Diagnostics go to stderr.
-- `--self-test`: runs with inlined fixtures (a small index snippet + a fixed tag
-  set) and asserts the output is exactly `2.1.0` and `1.0.0`. Exits non-zero on
-  mismatch. No test framework.
+  stdout, so callers can consume it directly). A human-readable reason per
+  version (`image neoskop/ixy:X.Y.Z missing` / `references deprecated
+  neoskop/ixy-ui`) goes to stderr so the workflow log shows why.
+- `--self-test`: runs the criterion-1 set-membership logic against inlined
+  fixtures (a small index snippet + a fixed tag set) and asserts the output is
+  exactly `2.1.0` and `1.0.0`. Exits non-zero on mismatch. No test framework.
+  The criterion-2 check is a single `grep -q` line (trivial); it is validated
+  end-to-end by the dry-run run rather than by a tarball fixture.
 
 Kept as a standalone script so the error-prone logic (set membership +
 pagination) is testable without CI.
@@ -76,8 +92,9 @@ Job `cleanup` (`runs-on: ubuntu-latest`, `permissions: contents: write`):
    `release.yml`).
 2. `actions/checkout@v6` with `ref: gh-pages` and `token: ${{ secrets.RELEASE_PAT }}`.
 3. Configure git as `github-actions[bot]`.
-4. Run `scripts/find-unusable-versions.sh index.yaml` → capture the version list.
-5. Print the unusable list with reasons (`chart X.Y.Z → image neoskop/ixy:X.Y.Z missing`).
+4. Run `scripts/find-unusable-versions.sh index.yaml` → capture stdout as the
+   version list (its stderr reasons land in the workflow log).
+5. Print the unusable list (versions + the per-version reasons from the script).
 6. If the list is empty: log "nothing to delete" and exit 0.
 7. If `mode == dry-run`: log "dry-run, no changes" and exit 0.
 8. If `mode == apply`, for each version V:
@@ -128,6 +145,8 @@ Mirror of `scripts/release.sh`: validates a `dry-run|apply` argument, checks for
   against inlined fixtures (must flag exactly `2.1.0` and `1.0.0`).
 - End-to-end validation: run the workflow in `dry-run` mode and confirm it
   reports exactly the currently-unusable versions before ever running `apply`.
+  Expected today: `2.1.0` (missing backend image) plus every 0.5.0–1.0.x version
+  (references `neoskop/ixy-ui`); `1.0.0` matches both criteria.
 
 ## Alternative considered
 
