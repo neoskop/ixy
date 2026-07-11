@@ -18,8 +18,8 @@ fetch_docker_tags() {
   local page
   while [ -n "$url" ] && [ "$url" != "null" ]; do
     page="$(curl -sf "$url")" || { echo "error: failed to fetch $url" >&2; return 1; }
-    echo "$page" | yq -p json eval '.results[].name' -
-    url="$(echo "$page" | yq -p json eval '.next // "null"' -)"
+    echo "$page" | yq -p json eval '.results[].name' - || { echo "error: failed to parse tags page from $url" >&2; return 1; }
+    url="$(echo "$page" | yq -p json eval '.next // "null"' -)" || { echo "error: failed to parse next-page URL" >&2; return 1; }
   done
 }
 
@@ -69,14 +69,18 @@ entries:
     - version: "1.0.0"
       appVersion: "1.0.0"
       urls: ["http://example/1.0.0.tgz"]
+    - version: "0.7.0"
+      appVersion: "0.7.0"
+      urls: ["http://example/uses-ui.tgz"]
 EOF
-  # Stub the network UI check so the self-test stays offline and exercises
-  # only the tag-membership logic (criterion 1).
-  chart_uses_ui() { return 1; }
-  local tags=$'2.1.1\n2.0.0'
+  # Stub the network UI check: pretend only the 0.7.0 chart references the UI
+  # image, so the self-test exercises BOTH criteria offline — tag-membership
+  # (criterion 1) and the deprecated-UI branch (criterion 2).
+  chart_uses_ui() { [ "$1" = "http://example/uses-ui.tgz" ]; }
+  local tags=$'2.1.1\n2.0.0\n0.7.0'
   local got expected
   got="$(find_unusable "$tmp" "$tags" 2>/dev/null | sort | tr '\n' ' ')"
-  expected="1.0.0 2.1.0 "
+  expected="0.7.0 1.0.0 2.1.0 "
   rm -f "$tmp"
   if [ "$got" != "$expected" ]; then
     echo "SELF-TEST FAILED: got [$got] expected [$expected]" >&2
