@@ -1,0 +1,101 @@
+name: Delete unusable versions
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "dry-run lists unusable versions; apply deletes them"
+        required: true
+        type: choice
+        default: dry-run
+        options:
+          - dry-run
+          - apply
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout gh-pages
+        uses: actions/checkout@v6
+        with:
+          ref: gh-pages
+          path: gh-pages
+          token: ${{ secrets.RELEASE_PAT }}
+
+      - name: Checkout main (for scripts)
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          path: main
+
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Configure git
+        working-directory: gh-pages
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Find unusable versions
+        id: find
+        run: |
+          chmod +x main/scripts/find-unusable-versions.sh
+          versions="$(main/scripts/find-unusable-versions.sh gh-pages/index.yaml)"
+          echo "Unusable versions:"
+          echo "${versions:-<none>}"
+          {
+            echo "versions<<EOF"
+            echo "$versions"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Dry-run summary
+        if: github.event.inputs.mode == 'dry-run'
+        run: 'echo "Dry-run mode: no changes made. Set mode=apply to delete the versions listed above."'
+
+      - name: Delete unusable versions and update indices
+        if: github.event.inputs.mode == 'apply'
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PAT }}
+        run: |
+          versions="${{ steps.find.outputs.versions }}"
+          if [ -z "$versions" ]; then
+            echo "Nothing to delete."
+            exit 0
+          fi
+          cd gh-pages
+          while IFS= read -r v; do
+            [ -z "$v" ] && continue
+            echo "Deleting chart version $v"
+            yq eval "del(.entries.ixy[] | select(.version == \"$v\"))" -i index.yaml
+            gh release delete "ixy-$v" --repo neoskop/ixy --yes --cleanup-tag
+          done <<< "$versions"
+
+          git add index.yaml
+          if git diff --cached --quiet; then
+            echo "index.yaml unchanged; skipping push."
+          else
+            git commit -m "chore: remove unusable chart versions"
+            git push origin gh-pages
+          fi
+
+          echo "Triggering global index rebuild..."
+          gh api repos/neoskop/helm-charts/dispatches -f event_type=update-index
+
+  notify-failure:
+    runs-on: ubuntu-latest
+    needs: cleanup
+    if: failure()
+    steps:
+      - uses: slackapi/slack-github-action@v3
+        with:
+          payload: '{"text": "*[ixy]:* Cleanup failed. Check: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
