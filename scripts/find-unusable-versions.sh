@@ -26,7 +26,7 @@ fetch_docker_tags() {
 # Does the chart tgz at $1 reference the deprecated UI image?
 chart_uses_ui() {
   local url="$1"
-  curl -sfL "$url" 2>/dev/null | tar xzO 2>/dev/null | grep -q "$UI_IMAGE"
+  curl -sfL "$url" 2>/dev/null | tar xzO 2>/dev/null | grep -F "$UI_IMAGE" >/dev/null
 }
 
 # Print unusable versions given an index file and a newline-separated tag list.
@@ -100,6 +100,10 @@ main() {
   fi
   local index="$1" tags
   tags="$(fetch_docker_tags "$IMAGE_REPO")"
+  if ! grep -q . <<<"$tags"; then
+    echo "error: Docker Hub returned no tags for ${IMAGE_REPO}; refusing to run (would flag every version as unusable)" >&2
+    exit 1
+  fi
   find_unusable "$index" "$tags"
 }
 

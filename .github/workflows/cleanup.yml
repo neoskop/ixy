@@ -75,7 +75,11 @@ jobs:
             [ -z "$v" ] && continue
             echo "Deleting chart version $v"
             yq eval "del(.entries.ixy[] | select(.version == \"$v\"))" -i index.yaml
-            gh release delete "ixy-$v" --repo neoskop/ixy --yes --cleanup-tag
+            if gh release view "ixy-$v" --repo neoskop/ixy >/dev/null 2>&1; then
+              gh release delete "ixy-$v" --repo neoskop/ixy --yes --cleanup-tag
+            else
+              echo "Release ixy-$v already absent; skipping."
+            fi
           done <<< "$VERSIONS"
 
           git add index.yaml
