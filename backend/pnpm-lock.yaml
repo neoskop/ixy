@@ -70,7 +70,7 @@ importers:
         specifier: ^24.12.0
         version: 24.13.3
       '@types/supertest':
-        specifier: ^7.0.0
+        specifier: ^7.2.0
         version: 7.2.0
       '@typescript-eslint/eslint-plugin':
         specifier: ^8.63.0
