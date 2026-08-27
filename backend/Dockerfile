@@ -1,4 +1,4 @@
-FROM node:24.19.0-alpine@sha256:eb37f58646a901dc7727cf448cae36daaefaba79de33b5058dab79aa4c04aefb AS base
+FROM node:24.20.0-alpine@sha256:e67514e5d0f6c46656005e1b693b2ec9d52e80b641307de684d4a015ba7a4eaf AS base
 RUN apk add --no-cache tini && corepack enable && corepack prepare pnpm@latest --activate
 USER node
 RUN mkdir /home/node/cache
