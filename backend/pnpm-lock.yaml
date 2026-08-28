@@ -73,10 +73,10 @@ importers:
         specifier: ^7.2.0
         version: 7.2.1
       '@typescript-eslint/eslint-plugin':
-        specifier: ^8.66.0
+        specifier: ^8.67.0
         version: 8.67.0(@typescript-eslint/parser@8.67.0(eslint@10.9.1(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3))(eslint@10.9.1(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3)
       '@typescript-eslint/parser':
-        specifier: ^8.66.0
+        specifier: ^8.67.0
         version: 8.67.0(eslint@10.9.1(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3)
       eslint:
         specifier: 10.9.1
