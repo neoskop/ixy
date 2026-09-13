@@ -7,7 +7,7 @@ image:
   repository: neoskop/ixy
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: ''
+  tag: '@sha256:25152b474f54231241f80270c77af9180bc3d3fd88676cae43c6bafc156a0971'
 imagePullSecrets: []
 nameOverride: ''
 fullnameOverride: ''
