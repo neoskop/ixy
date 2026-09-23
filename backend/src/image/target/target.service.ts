@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { queue, QueueObject } from 'async';
 import sharp from 'sharp';
@@ -71,10 +71,14 @@ export class TargetService {
         resizeOptions.position = parsedArgs.strategy;
       }
 
-      const arrayBuffer = await this.resizeQueue.push<Buffer>(() =>
+      const arrayBuffer = await this.resizeQueue.pushAsync<Buffer>(() =>
         measured(
           () =>
-            sharp(image)
+            sharp(image, {
+              limitInputPixels: Number(
+                this.configService.getOrThrow('MAX_INPUT_PIXELS'),
+              ),
+            })
               .resize(resizeOptions)
               .withMetadata()
               .webp({ quality: 80 })
@@ -91,6 +95,12 @@ export class TargetService {
       return arrayBuffer;
     } catch (error) {
       Logger.error(`Failed to resize image: ${path}`, error);
+      if (error.message?.includes('pixel limit')) {
+        throw new BadRequestException(
+          'Source image exceeds the maximum number of pixels.',
+        );
+      }
+      throw error;
     }
   }
 }

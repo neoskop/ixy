@@ -59,6 +59,7 @@ For more details on how crops are applied with these arguments read the [Sharp d
 - `MAX_WIDTH`: The maximum width of the target image (Default: `2000`)
 - `MAX_HEIGHT`: The maximum height of the target image (Default: `2000`)
 - `RESIZE_CONCURRENCY`: The maximum number of images resized at the same time, which bounds peak memory (Default: `2`)
+- `MAX_INPUT_PIXELS`: The maximum number of pixels (width x height) of a source image; larger sources are rejected (Default: `100000000`, i.e. 100 megapixels)
 - `MAX_SIZE`: The maximum size of the source image in megabytes (Default: `5`)
 - `REVALIDATE_TIME`: The time in minutes for checking the source image for changes after its last access (Default: `30`)
 - `TIMEOUT`: The timeout in seconds when fetching source images (Default: `15`)
