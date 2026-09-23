@@ -5,3 +5,4 @@ allowBuilds:
   sharp: true
   "@nestjs/core": false
   unrs-resolver: false
+  "@parcel/watcher": false
