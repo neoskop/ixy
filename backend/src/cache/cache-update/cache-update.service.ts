@@ -14,6 +14,8 @@ import { Stats } from 'node:fs';
 
 @Injectable()
 export class CacheUpdateService {
+  private readonly inFlight = new Set<string>();
+
   constructor(
     private readonly cacheService: CacheService,
     private readonly targetService: TargetService,
@@ -67,6 +69,18 @@ export class CacheUpdateService {
   }
 
   public async updateInBackground(path: string) {
+    if (this.inFlight.has(path)) {
+      return;
+    }
+    this.inFlight.add(path);
+    try {
+      await this.checkForUpdate(path);
+    } finally {
+      this.inFlight.delete(path);
+    }
+  }
+
+  private async checkForUpdate(path: string) {
     const url = `${this.configService.getOrThrow<string>('BASE_URL')}${path}`;
     const fullPath = `${this.configService.getOrThrow<string>(
       'CACHE_DIR',
@@ -131,7 +145,12 @@ export class CacheUpdateService {
         },
       });
 
-      if (response.status === 304) {
+      // Some upstreams (Magnolia DAM) answer 200 to an unchanged image despite
+      // If-Modified-Since, so also compare the bytes before re-rendering.
+      if (
+        response.status === 304 ||
+        (await fs.readFile(fullPath)).equals(Buffer.from(response.data))
+      ) {
         Logger.debug(`The image hasn't changed! Nothing to do.`);
       } else {
         Logger.debug(`The image has changed ... updating!`);
