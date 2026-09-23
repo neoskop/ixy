@@ -1,4 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { queue, QueueObject } from 'async';
 import sharp from 'sharp';
 import { CacheService } from '../../cache/cache.service.js';
 import { canonicalizeFileName } from '../../util/canonicalize-filename.js';
@@ -7,7 +9,19 @@ import { ParsedArgs } from '../parsed-args.js';
 
 @Injectable()
 export class TargetService {
-  public constructor(private readonly cacheService: CacheService) {}
+  // Every resize (request and background update) goes through this queue so
+  // peak memory is bounded by RESIZE_CONCURRENCY decoded images, not by load.
+  private readonly resizeQueue: QueueObject<() => Promise<Buffer>>;
+
+  public constructor(
+    private readonly cacheService: CacheService,
+    private readonly configService: ConfigService,
+  ) {
+    this.resizeQueue = queue(
+      async (job: () => Promise<Buffer>) => job(),
+      Number(this.configService.getOrThrow<string>('RESIZE_CONCURRENCY')),
+    );
+  }
 
   public async fetchExistingTargetImage(
     path: string,
@@ -33,11 +47,21 @@ export class TargetService {
     parsedArgs: ParsedArgs,
   ) {
     try {
-      const resizeOptions: sharp.ResizeOptions = {
-        width: targetWidth == 0 ? undefined : targetWidth,
-        height: targetHeight == 0 ? undefined : targetHeight,
-        fit: sharp.fit.cover,
-      };
+      // 0x0 means "the source image", but a full-resolution re-encode of a
+      // large source costs hundreds of MiB, so bound it by MAX_WIDTH/HEIGHT.
+      const resizeOptions: sharp.ResizeOptions =
+        targetWidth == 0 && targetHeight == 0
+          ? {
+              width: Number(this.configService.getOrThrow('MAX_WIDTH')),
+              height: Number(this.configService.getOrThrow('MAX_HEIGHT')),
+              fit: sharp.fit.inside,
+              withoutEnlargement: true,
+            }
+          : {
+              width: targetWidth == 0 ? undefined : targetWidth,
+              height: targetHeight == 0 ? undefined : targetHeight,
+              fit: sharp.fit.cover,
+            };
 
       if (parsedArgs.gravity) {
         resizeOptions.position = parsedArgs.gravity;
@@ -47,14 +71,16 @@ export class TargetService {
         resizeOptions.position = parsedArgs.strategy;
       }
 
-      const arrayBuffer = await measured(
-        () =>
-          sharp(image)
-            .resize(resizeOptions)
-            .withMetadata()
-            .webp({ quality: 80 })
-            .toBuffer(),
-        `Resized image`,
+      const arrayBuffer = await this.resizeQueue.push<Buffer>(() =>
+        measured(
+          () =>
+            sharp(image)
+              .resize(resizeOptions)
+              .withMetadata()
+              .webp({ quality: 80 })
+              .toBuffer(),
+          `Resized image`,
+        ),
       );
       await this.cacheService.storeFileInCache(
         `target/${canonicalizeFileName(path)}`,

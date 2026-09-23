@@ -36,7 +36,7 @@ gravity for crop: center ------+     |
 source image path -------------------+
 ```
 
-If image width or height is set to 0 the aspect ratio is retained. If both are 0 the source image is returned.
+If image width or height is set to 0 the aspect ratio is retained. If both are 0 the source image is returned, scaled down to fit within `MAX_WIDTH`x`MAX_HEIGHT` if larger.
 
 The gravity (`g`) argument is optional and it can also take the following values:
 
@@ -58,6 +58,7 @@ For more details on how crops are applied with these arguments read the [Sharp d
 - `BASE_URL`: The base URL of the upstream server
 - `MAX_WIDTH`: The maximum width of the target image (Default: `2000`)
 - `MAX_HEIGHT`: The maximum height of the target image (Default: `2000`)
+- `RESIZE_CONCURRENCY`: The maximum number of images resized at the same time, which bounds peak memory (Default: `2`)
 - `MAX_SIZE`: The maximum size of the source image in megabytes (Default: `5`)
 - `REVALIDATE_TIME`: The time in minutes for checking the source image for changes after its last access (Default: `30`)
 - `TIMEOUT`: The timeout in seconds when fetching source images (Default: `15`)
