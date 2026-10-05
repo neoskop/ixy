@@ -67,7 +67,7 @@ importers:
         specifier: ^30.0.0
         version: 30.0.0
       '@types/node':
-        specifier: ^24.13.4
+        specifier: ^24.19.0
         version: 24.19.0
       '@types/supertest':
         specifier: ^7.2.0
