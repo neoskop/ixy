@@ -1,3 +1,5 @@
+export type ImageFormat = 'avif' | 'webp';
+
 export class ParsedArgs {
   public fileSuffix: string = '';
   public gravity?:
@@ -12,7 +14,10 @@ export class ParsedArgs {
     | 'center';
   public strategy?: 'attention' | 'entropy';
 
-  constructor(args: string) {
+  constructor(
+    args: string,
+    public readonly format: ImageFormat = 'avif',
+  ) {
     if (!args) {
       return;
     }
@@ -39,16 +44,14 @@ export class ParsedArgs {
   }
 
   static fromFileName(imageFile: string): ParsedArgs {
-    const regex = /-(g-[news]|s-[ea])\.webp$/;
-    const match = imageFile.match(regex);
-    if (match) {
-      return new ParsedArgs(match[1].replace('-', ':'));
-    } else {
-      return new ParsedArgs(null);
-    }
+    const { args, format } =
+      /(?:-(?<args>g-[news]|s-[ea]))?\.(?<format>avif|webp)$/.exec(
+        imageFile,
+      ).groups;
+    return new ParsedArgs(args?.replace('-', ':'), format as ImageFormat);
   }
 
   public toString() {
-    return this.fileSuffix;
+    return `${this.fileSuffix}.${this.format}`;
   }
 }

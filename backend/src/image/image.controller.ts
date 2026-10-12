@@ -11,7 +11,7 @@ import chalk from 'chalk';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { ImageService } from './image.service.js';
 import { ConfigService } from '@nestjs/config';
-import { ParsedArgs } from './parsed-args.js';
+import { ImageFormat, ParsedArgs } from './parsed-args.js';
 
 @Controller('*')
 export class ImageController {
@@ -22,12 +22,18 @@ export class ImageController {
 
   private getParams(request: FastifyRequest) {
     const urlRegex =
-      /\/(?<width>\d{1,4})\/(?<height>\d{1,4})(?:\/(?<args>s:[ea]|g:[news]))?(?<path>\/(?:.+))/i;
+      /\/(?<width>\d{1,4})\/(?<height>\d{1,4})(?:\/(?<args>s:[ea]|g:[news]))?(?:\/f:(?<format>avif|webp))?(?<path>\/(?:.+))/i;
 
     const {
-      groups: { width, height, path, args },
+      groups: { width, height, path, args, format },
     } = RegExp(urlRegex).exec(request.url) || {
-      groups: { width: null, height: null, path: null, args: null },
+      groups: {
+        width: null,
+        height: null,
+        path: null,
+        args: null,
+        format: null,
+      },
     };
 
     const parsedWidth = parseInt(width);
@@ -51,7 +57,10 @@ export class ImageController {
       );
     }
 
-    const parsedArgs = new ParsedArgs(args);
+    const parsedArgs = new ParsedArgs(
+      args,
+      format?.toLowerCase() as ImageFormat | undefined,
+    );
 
     return {
       parsedWidth,
@@ -83,7 +92,7 @@ export class ImageController {
         forwardedBy,
       );
 
-      reply.header('Content-Type', 'image/webp');
+      reply.header('Content-Type', `image/${parsedArgs.format}`);
       reply.header(
         'Cache-Control',
         `public, max-age=${
