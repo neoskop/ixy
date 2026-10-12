@@ -11,7 +11,7 @@ import chalk from 'chalk';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { ImageService } from './image.service.js';
 import { ConfigService } from '@nestjs/config';
-import { ImageFormat, ParsedArgs } from './parsed-args.js';
+import { ParsedArgs } from './parsed-args.js';
 
 @Controller('*')
 export class ImageController {
@@ -22,17 +22,16 @@ export class ImageController {
 
   private getParams(request: FastifyRequest) {
     const urlRegex =
-      /\/(?<width>\d{1,4})\/(?<height>\d{1,4})(?:\/(?<args>s:[ea]|g:[news]))?(?:\/f:(?<format>avif|webp))?(?<path>\/(?:.+))/i;
+      /\/(?<width>\d{1,4})\/(?<height>\d{1,4})(?<flags>(?:\/(?:s:[ea]|g:[news]|f:(?:avif|webp)))*)(?<path>\/(?:.+))/i;
 
     const {
-      groups: { width, height, path, args, format },
+      groups: { width, height, path, flags },
     } = RegExp(urlRegex).exec(request.url) || {
       groups: {
         width: null,
         height: null,
         path: null,
-        args: null,
-        format: null,
+        flags: null,
       },
     };
 
@@ -57,10 +56,13 @@ export class ImageController {
       );
     }
 
-    const parsedArgs = new ParsedArgs(
-      args,
-      format?.toLowerCase() as ImageFormat | undefined,
-    );
+    const parsedArgs = ParsedArgs.fromUrlFlags(flags);
+
+    if (!parsedArgs) {
+      throw new BadRequestException(
+        'Each argument may only be given once and gravity and strategy are mutually exclusive.',
+      );
+    }
 
     return {
       parsedWidth,

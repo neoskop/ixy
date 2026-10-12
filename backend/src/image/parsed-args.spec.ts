@@ -14,4 +14,13 @@ describe('ParsedArgs', () => {
     expect(legacy.format).toBe('webp');
     expect(legacy.strategy).toBe('entropy');
   });
+
+  it('accepts URL flags in any order and rejects duplicates', () => {
+    expect(`${ParsedArgs.fromUrlFlags('/f:webp/g:n')}`).toBe('-g-n.webp');
+    expect(`${ParsedArgs.fromUrlFlags('/G:N/F:WEBP')}`).toBe('-g-n.webp');
+    expect(`${ParsedArgs.fromUrlFlags('/s:a')}`).toBe('-s-a.avif');
+    expect(`${ParsedArgs.fromUrlFlags(undefined)}`).toBe('.avif');
+    expect(ParsedArgs.fromUrlFlags('/g:n/s:a')).toBeNull();
+    expect(ParsedArgs.fromUrlFlags('/f:webp/f:avif')).toBeNull();
+  });
 });

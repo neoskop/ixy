@@ -51,10 +51,12 @@ Instead of gravity you can also use a strategy (`s`) argument:
 - `a`: Attention
 - `e`: Entropy
 
-The format (`f`) argument is optional as well and selects the output format. It goes after the gravity or strategy argument, if any:
+The format (`f`) argument is optional as well and selects the output format:
 
 - `avif`: AVIF (default)
 - `webp`: WebP
+
+Arguments can be given in any order (`/f:webp/g:n/` equals `/g:n/f:webp/`). Each argument may appear only once, and gravity and strategy cannot be combined.
 
 For more details on how crops are applied with these arguments read the [Sharp documentation](https://sharp.pixelplumbing.com/api-resize).
 
