@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@fastify/etag':
-        specifier: 6.2.0
-        version: 6.2.0
+        specifier: 6.2.1
+        version: 6.2.1
       '@kubernetes/client-node':
         specifier: 1.4.0
         version: 1.4.0(supports-color@8.1.1)
@@ -381,8 +381,8 @@ packages:
   '@fastify/error@4.2.1':
     resolution: {integrity: sha512-MYBumuIwP+5MIpXSyKm6/o1Eigcoij186lWUssX3LH5U8KWqU0ktZhzC4CErIX9EJeQeRGI+zJZQWakBlFbUcg==}
 
-  '@fastify/etag@6.2.0':
-    resolution: {integrity: sha512-ptNM6UYBY+DFbZ4UPCSlGN0YRRIBy1ZAoo/cPLu8m7xJ58XpfTYLvS5bpS5KFws7MEcCqJJuAMu+rvrRCISfgw==}
+  '@fastify/etag@6.2.1':
+    resolution: {integrity: sha512-Jz5FFgtDIEC6glecypaOYv7ALdPmSGwJBYnhbSnXrsdRVq3TkapLUuNhkzVV3s6i2JiALZea14V20K0P94TPoA==}
 
   '@fastify/fast-json-stringify-compiler@5.1.1':
     resolution: {integrity: sha512-pyxRKk7UpUnnrztP9pF4+ZYxusEQ4LifTyzRdiXmyql1QezNHxO02D25MVU2o4kMeAMYWAjG6RKRlojgkbiDAw==}
@@ -3801,7 +3801,7 @@ snapshots:
 
   '@fastify/error@4.2.1': {}
 
-  '@fastify/etag@6.2.0':
+  '@fastify/etag@6.2.1':
     dependencies:
       fastify-plugin: 6.0.1
 
