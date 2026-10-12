@@ -6,3 +6,4 @@ allowBuilds:
   "@nestjs/core": false
   unrs-resolver: false
   "@parcel/watcher": false
+minimumReleaseAge: 4320 # 3 days, in minutes
