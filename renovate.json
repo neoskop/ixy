@@ -10,6 +10,16 @@
             ],
             "matchCurrentVersion": "!/^0/",
             "automerge": true
+        },
+        {
+            "description": "The chart's own image tag must stay empty so it defaults to appVersion",
+            "matchManagers": [
+                "helm-values"
+            ],
+            "matchPackageNames": [
+                "neoskop/ixy"
+            ],
+            "enabled": false
         }
     ],
     "lockFileMaintenance": {
