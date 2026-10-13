@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { queue, QueueObject } from 'async';
-import sharp from 'sharp';
+import sharp, { type ResizeOptions } from 'sharp';
 import { CacheService } from '../../cache/cache.service.js';
 import { canonicalizeFileName } from '../../util/canonicalize-filename.js';
 import { measured } from '../../util/measured.js';
@@ -49,7 +49,7 @@ export class TargetService {
     try {
       // 0x0 means "the source image", but a full-resolution re-encode of a
       // large source costs hundreds of MiB, so bound it by MAX_WIDTH/HEIGHT.
-      const resizeOptions: sharp.ResizeOptions =
+      const resizeOptions: ResizeOptions =
         targetWidth == 0 && targetHeight == 0
           ? {
               width: Number(this.configService.getOrThrow('MAX_WIDTH')),
