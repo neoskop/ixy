@@ -1,4 +1,3 @@
-import { describe, expect, it } from '@jest/globals';
 import { ParsedArgs } from './parsed-args.js';
 
 describe('ParsedArgs', () => {

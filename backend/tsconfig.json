@@ -4,6 +4,7 @@
     "ignoreDeprecations": "6.0",
     "useUnknownInCatchVariables": false,
     "rootDir": "./src",
+    "types": ["node", "jest"],
     "declaration": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,
