@@ -1,3 +1,5 @@
+export type ImageFormat = 'avif' | 'webp';
+
 export class ParsedArgs {
   public fileSuffix: string = '';
   public gravity?:
@@ -12,7 +14,10 @@ export class ParsedArgs {
     | 'center';
   public strategy?: 'attention' | 'entropy';
 
-  constructor(args: string) {
+  constructor(
+    args: string,
+    public readonly format: ImageFormat = 'avif',
+  ) {
     if (!args) {
       return;
     }
@@ -38,17 +43,32 @@ export class ParsedArgs {
     this.fileSuffix = '-' + args.replace(':', '-');
   }
 
-  static fromFileName(imageFile: string): ParsedArgs {
-    const regex = /-(g-[news]|s-[ea])\.webp$/;
-    const match = imageFile.match(regex);
-    if (match) {
-      return new ParsedArgs(match[1].replace('-', ':'));
-    } else {
-      return new ParsedArgs(null);
+  // Flags are path segments like "/f:webp/g:n" and may come in any order.
+  // Returns null if an argument is repeated or gravity and strategy collide.
+  static fromUrlFlags(flags: string): ParsedArgs | null {
+    const segments = flags ? flags.slice(1).toLowerCase().split('/') : [];
+    const crop = segments.filter((segment) => !segment.startsWith('f:'));
+    const formats = segments.filter((segment) => segment.startsWith('f:'));
+
+    if (crop.length > 1 || formats.length > 1) {
+      return null;
     }
+
+    return new ParsedArgs(
+      crop[0],
+      formats[0]?.slice(2) as ImageFormat | undefined,
+    );
+  }
+
+  static fromFileName(imageFile: string): ParsedArgs {
+    const { args, format } =
+      /(?:-(?<args>g-[news]|s-[ea]))?\.(?<format>avif|webp)$/.exec(
+        imageFile,
+      ).groups;
+    return new ParsedArgs(args?.replace('-', ':'), format as ImageFormat);
   }
 
   public toString() {
-    return this.fileSuffix;
+    return `${this.fileSuffix}.${this.format}`;
   }
 }

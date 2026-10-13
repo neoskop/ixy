@@ -31,7 +31,7 @@ export class TargetService {
   ) {
     const arrayBuffer = await this.cacheService.loadFileFromCache(
       `target/${canonicalizeFileName(path)}`,
-      `${parsedWidth}-${parsedHeight}${parsedArgs}.webp`,
+      `${parsedWidth}-${parsedHeight}${parsedArgs}`,
     );
 
     if (arrayBuffer) {
@@ -81,14 +81,16 @@ export class TargetService {
             })
               .resize(resizeOptions)
               .withMetadata()
-              .webp({ quality: 80 })
+              .toFormat(parsedArgs.format, {
+                quality: parsedArgs.format === 'avif' ? 50 : 80,
+              })
               .toBuffer(),
           `Resized image`,
         ),
       );
       await this.cacheService.storeFileInCache(
         `target/${canonicalizeFileName(path)}`,
-        `${targetWidth}-${targetHeight}${parsedArgs}.webp`,
+        `${targetWidth}-${targetHeight}${parsedArgs}`,
         arrayBuffer,
         Date.now(),
       );

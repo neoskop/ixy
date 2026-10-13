@@ -28,16 +28,13 @@ export class CacheUpdateService {
   ) {
     const targetPath = `${this.configService.getOrThrow<string>(
       'CACHE_DIR',
-    )}/target/${canonicalizeFileName(path)}/*.webp`;
+    )}/target/${canonicalizeFileName(path)}/*.{avif,webp}`;
     const imageFiles = await glob(targetPath);
 
     await eachLimit(imageFiles, 5, async (imageFile) => {
-      const targetWidth = parseInt(
-        RegExp(/\/(\d+)-\d+\.webp$/).exec(imageFile)[1],
-      );
-      const targetHeight = parseInt(
-        RegExp(/\/\d+-(\d+)\.webp$/).exec(imageFile)[1],
-      );
+      const [, targetWidth, targetHeight] = RegExp(/\/(\d+)-(\d+)[^/]*$/)
+        .exec(imageFile)
+        .map(Number);
       const parsedArgs = ParsedArgs.fromFileName(imageFile);
       await this.targetService.resizeImage(
         path,

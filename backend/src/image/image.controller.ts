@@ -22,12 +22,17 @@ export class ImageController {
 
   private getParams(request: FastifyRequest) {
     const urlRegex =
-      /\/(?<width>\d{1,4})\/(?<height>\d{1,4})(?:\/(?<args>s:[ea]|g:[news]))?(?<path>\/(?:.+))/i;
+      /\/(?<width>\d{1,4})\/(?<height>\d{1,4})(?<flags>(?:\/(?:s:[ea]|g:[news]|f:(?:avif|webp)))*)(?<path>\/(?:.+))/i;
 
     const {
-      groups: { width, height, path, args },
+      groups: { width, height, path, flags },
     } = RegExp(urlRegex).exec(request.url) || {
-      groups: { width: null, height: null, path: null, args: null },
+      groups: {
+        width: null,
+        height: null,
+        path: null,
+        flags: null,
+      },
     };
 
     const parsedWidth = parseInt(width);
@@ -51,7 +56,13 @@ export class ImageController {
       );
     }
 
-    const parsedArgs = new ParsedArgs(args);
+    const parsedArgs = ParsedArgs.fromUrlFlags(flags);
+
+    if (!parsedArgs) {
+      throw new BadRequestException(
+        'Each argument may only be given once and gravity and strategy are mutually exclusive.',
+      );
+    }
 
     return {
       parsedWidth,
@@ -83,7 +94,7 @@ export class ImageController {
         forwardedBy,
       );
 
-      reply.header('Content-Type', 'image/webp');
+      reply.header('Content-Type', `image/${parsedArgs.format}`);
       reply.header(
         'Cache-Control',
         `public, max-age=${

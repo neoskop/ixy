@@ -27,13 +27,14 @@ $ curl -o /dev/null \
 The URL are parsed as followed:
 
 ```
-http://127.0.0.1:8080/200/200/g:n/300/300
-                     |___|___|___|_______|
-                       |   |   |     |
-target image width ----+   |   |     |
-target image height -------+   |     |
-gravity for crop: center ------+     |
-source image path -------------------+
+http://127.0.0.1:8080/200/200/g:n/f:webp/300/300
+                     |___|___|___|______|_______|
+                       |   |   |     |      |
+target image width ----+   |   |     |      |
+target image height -------+   |     |      |
+gravity for crop: north -------+     |      |
+output format: WebP -----------------+      |
+source image path --------------------------+
 ```
 
 If image width or height is set to 0 the aspect ratio is retained. If both are 0 the source image is returned, scaled down to fit within `MAX_WIDTH`x`MAX_HEIGHT` if larger.
@@ -49,6 +50,13 @@ Instead of gravity you can also use a strategy (`s`) argument:
 
 - `a`: Attention
 - `e`: Entropy
+
+The format (`f`) argument is optional as well and selects the output format:
+
+- `avif`: AVIF (default)
+- `webp`: WebP
+
+Arguments can be given in any order (`/f:webp/g:n/` equals `/g:n/f:webp/`). Each argument may appear only once, and gravity and strategy cannot be combined.
 
 For more details on how crops are applied with these arguments read the [Sharp documentation](https://sharp.pixelplumbing.com/api-resize).
 
