@@ -84,7 +84,20 @@ if [ -n "$HAS_APP" ]; then
         kubectl -n argocd patch applicationset ixy --type=merge \
             -p "{\"spec\":{\"preservedFields\":${patched}}}"
     fi
-    kubectl -n argocd annotate application ixy "${SKIP_RECONCILE}=true" --overwrite
+    # The ApplicationSet can still strip the annotation until it has seen the
+    # new preservedFields, so check that it stays before scaling down.
+    paused=""
+    for _ in 1 2 3 4 5 6; do
+        kubectl -n argocd annotate application ixy "${SKIP_RECONCILE}=true" --overwrite
+        sleep 10
+        paused=$(kubectl -n argocd get application ixy \
+            -o jsonpath='{.metadata.annotations.argocd\.argoproj\.io/skip-reconcile}')
+        [ "$paused" = "true" ] && break
+    done
+    if [ "$paused" != "true" ]; then
+        echo "ArgoCD keeps removing ${SKIP_RECONCILE}, aborting" >&2
+        exit 1
+    fi
 fi
 
 kubectl -n "$NS" scale sts/ixy --replicas=0
