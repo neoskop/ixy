@@ -84,6 +84,51 @@ volumeMounts: []
 #   mountPath: "/etc/foo"
 #   readOnly: true
 
+# NetworkPolicy for the ixy pods (ingress and egress). The ixy pods may always
+# reach each other on the service port (cluster mode).
+networkPolicy:
+  enabled: false
+  # Peers (NetworkPolicyPeer) allowed to call the service port, e.g. the
+  # namespace of the frontend that proxies image requests to ixy.
+  ingressFrom: []
+  # - namespaceSelector:
+  #     matchLabels:
+  #       kubernetes.io/metadata.name: website
+  dns:
+    enabled: true
+    namespaceSelector:
+      matchLabels:
+        kubernetes.io/metadata.name: kube-system
+    # Extra DNS servers outside the cluster network, e.g. a node-local DNS
+    # cache on a link-local address (169.254.20.10/32).
+    ipBlocks: []
+  # Where ixy downloads the source images from (BASE_URL). Without `to`, any
+  # destination on these ports is allowed.
+  source:
+    to: []
+    # - namespaceSelector:
+    #     matchLabels:
+    #       kubernetes.io/metadata.name: magnolia
+    ports:
+      - 80
+      - 443
+  # kube-apiserver, needed in cluster mode to list the peer pods. The policy
+  # sees the API server endpoint after kube-proxy's DNAT, so use the address of
+  # the `kubernetes` Service's endpoints (kubectl get endpointslices -n default
+  # -l kubernetes.io/service-name=kubernetes), not its ClusterIP. Without `to`,
+  # any destination on these ports; without ports, any port on `to`.
+  apiServer:
+    enabled: true
+    to: []
+    # - ipBlock:
+    #     cidr: 203.0.113.10/32
+    ports:
+      - 443
+      - 6443
+  # Additional NetworkPolicyIngressRule / NetworkPolicyEgressRule entries.
+  extraIngress: []
+  extraEgress: []
+
 nodeSelector: {}
 tolerations: []
 affinity: {}
