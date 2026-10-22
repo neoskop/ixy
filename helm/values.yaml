@@ -31,16 +31,24 @@ config:
   CLUSTER_MODE: true
 podAnnotations: {}
 podLabels: {}
+# The image runs as node (1000:1000); the IDs are set explicitly because
+# runAsNonRoot cannot verify the named USER of the image.
 podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
   fsGroup: 1000
+  seccompProfile:
+    type: RuntimeDefault
 
-securityContext: {}
-# capabilities:
-#   drop:
-#   - ALL
+# The ServiceAccount token stays mounted: in cluster mode ixy lists the pods
+# of its namespace to find its peers (see role above).
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
 # readOnlyRootFilesystem: true
-# runAsNonRoot: true
-# runAsUser: 1000
 
 service:
   type: ClusterIP
