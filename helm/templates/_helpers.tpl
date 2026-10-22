@@ -60,3 +60,25 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+NetworkPolicy egress rule from a list of peers ("to") and TCP ports ("ports");
+either may be empty, not both.
+*/}}
+{{- define "ixy.networkPolicyRule" -}}
+{{- if and (empty .to) (empty .ports) }}
+{{- fail "networkPolicy: an egress rule needs `to` or `ports`" }}
+{{- end }}
+{{- $rule := dict }}
+{{- with .to }}
+{{- $_ := set $rule "to" . }}
+{{- end }}
+{{- with .ports }}
+{{- $ports := list }}
+{{- range . }}
+{{- $ports = append $ports (dict "protocol" "TCP" "port" .) }}
+{{- end }}
+{{- $_ := set $rule "ports" $ports }}
+{{- end }}
+{{- toYaml $rule }}
+{{- end }}
