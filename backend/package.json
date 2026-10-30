@@ -27,7 +27,7 @@
     "@nestjs/core": "^12.1.2",
     "@nestjs/platform-fastify": "12.3.1",
     "async": "3.2.6",
-    "axios": "1.20.0",
+    "axios": "1.21.0",
     "chalk": "6.0.1",
     "fast-glob": "3.3.3",
     "fastify": "5.12.7",
