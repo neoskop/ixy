@@ -1,0 +1,68 @@
+{{- if .Values.networkPolicy.enabled }}
+{{- $np := .Values.networkPolicy }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "ixy.fullname" . }}
+  labels:
+    {{- include "ixy.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "ixy.selectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # The configured callers, and the ixy pods themselves: in cluster mode a
+    # pod fetches images it does not own from the owning peer by pod IP.
+    - from:
+        - podSelector:
+            matchLabels:
+              {{- include "ixy.selectorLabels" . | nindent 14 }}
+        {{- with $np.ingressFrom }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      ports:
+        - protocol: TCP
+          port: http
+    {{- with $np.extraIngress }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  egress:
+    # Peers in cluster mode.
+    - to:
+        - podSelector:
+            matchLabels:
+              {{- include "ixy.selectorLabels" . | nindent 14 }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.service.port }}
+    {{- if $np.dns.enabled }}
+    - to:
+        {{- with $np.dns.namespaceSelector }}
+        - namespaceSelector:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+        {{- range $np.dns.ipBlocks }}
+        - ipBlock:
+            cidr: {{ . }}
+        {{- end }}
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    {{- end }}
+    # Image source (BASE_URL). Without `to`, any destination on these ports.
+    - {{ include "ixy.networkPolicyRule" (dict "to" $np.source.to "ports" $np.source.ports) | nindent 6 | trim }}
+    {{- if $np.apiServer.enabled }}
+    # kube-apiserver: cluster mode lists the pods of the namespace to find its
+    # peers. Without `to`, any destination on these ports; without ports, any
+    # port on the `to` peers.
+    - {{ include "ixy.networkPolicyRule" (dict "to" $np.apiServer.to "ports" $np.apiServer.ports) | nindent 6 | trim }}
+    {{- end }}
+    {{- with $np.extraEgress }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+{{- end }}
