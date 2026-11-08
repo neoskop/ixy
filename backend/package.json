@@ -20,7 +20,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@fastify/etag": "6.2.1",
+    "@fastify/etag": "6.2.2",
     "@kubernetes/client-node": "2.0.2",
     "@nestjs/common": "^12.1.2",
     "@nestjs/config": "12.1.0",
