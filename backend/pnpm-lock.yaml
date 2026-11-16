@@ -52,8 +52,8 @@ importers:
         version: 0.35.5(@types/node@24.19.2)
     devDependencies:
       '@nestjs/cli':
-        specifier: 12.0.12
-        version: 12.0.12(@types/node@24.19.2)(prettier@3.10.1)(ts-loader@9.6.2(typescript@6.0.3)(webpack@5.112.2(sharp@0.35.5(@types/node@24.19.2))(uglify-js@3.19.3)))(webpack@5.112.2(sharp@0.35.5(@types/node@24.19.2))(uglify-js@3.19.3))
+        specifier: 12.0.13
+        version: 12.0.13(@types/node@24.19.2)(prettier@3.10.1)(ts-loader@9.6.2(typescript@6.0.3)(webpack@5.112.2(sharp@0.35.5(@types/node@24.19.2))(uglify-js@3.19.3)))(webpack@5.112.2(sharp@0.35.5(@types/node@24.19.2))(uglify-js@3.19.3))
       '@nestjs/schematics':
         specifier: 12.0.13
         version: 12.0.13(chokidar@5.0.0)(prettier@3.10.1)(typescript@6.0.3)
@@ -855,8 +855,8 @@ packages:
     resolution: {integrity: sha512-Z7C/xXCiGWsg0KuKsHTKJxbWhpI3Vs5GwLfOean7MGyVFGqdRgBbAjOCh6u4bbjPc/8MJ2pZmK/0DLdCbivLDA==}
     engines: {node: '>=8'}
 
-  '@nestjs/cli@12.0.12':
-    resolution: {integrity: sha512-6Ab0zxLqYzZD8aEYWvleCIkvxJhcUtjR1VfQ/Hqg1/xhinKmSaFXEbFxc3QgqsJdoM//hRoMl0iQ4sudam1pjg==}
+  '@nestjs/cli@12.0.13':
+    resolution: {integrity: sha512-dfb9zbM4VRUQnkjt0IyhYWxiScDq/4j8m6Y5f6PKvg6LK47XbzBeWKCBdqVFQV85uAHdJiMa8nyemAu0xvujRQ==}
     engines: {node: '>= 20.11'}
     hasBin: true
     peerDependencies:
@@ -4216,7 +4216,7 @@ snapshots:
 
   '@lukeed/csprng@1.1.0': {}
 
-  '@nestjs/cli@12.0.12(@types/node@24.19.2)(prettier@3.10.1)(ts-loader@9.6.2(typescript@6.0.3)(webpack@5.112.2(sharp@0.35.5(@types/node@24.19.2))(uglify-js@3.19.3)))(webpack@5.112.2(sharp@0.35.5(@types/node@24.19.2))(uglify-js@3.19.3))':
+  '@nestjs/cli@12.0.13(@types/node@24.19.2)(prettier@3.10.1)(ts-loader@9.6.2(typescript@6.0.3)(webpack@5.112.2(sharp@0.35.5(@types/node@24.19.2))(uglify-js@3.19.3)))(webpack@5.112.2(sharp@0.35.5(@types/node@24.19.2))(uglify-js@3.19.3))':
     dependencies:
       '@angular-devkit/core': 22.2.6(chokidar@5.0.0)
       '@angular-devkit/schematics': 22.2.6(chokidar@5.0.0)
