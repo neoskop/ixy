@@ -98,7 +98,7 @@ jobs:
     needs: cleanup
     if: failure()
     steps:
-      - uses: slackapi/slack-github-action@0d95c9a7becc1e6e297d76df9bc735c44f4cbcbc # v3
+      - uses: slackapi/slack-github-action@0bc3581177d9a0f8d555e07689384b376528e8fa # v4
         with:
           payload: '{"text": "*[ixy]:* Cleanup failed. Check: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}'
         env:
